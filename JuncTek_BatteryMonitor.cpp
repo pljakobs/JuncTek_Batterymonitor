@@ -1,5 +1,6 @@
   
-void BatteryMonitor(uint8_t address, Stream &serialDevice){
+
+void BatteryMonitor(int address, Stream *serialDevice){
   bm_serial=serialDevice;
   bm_address=address;
   setValues.deviceAddress=bm_address;

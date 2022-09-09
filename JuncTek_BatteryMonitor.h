@@ -1,6 +1,8 @@
 #ifndef _BATTERYMONITORH_
 #define _BATTERYMONITORH_
 
+#include "Stream.h"
+
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
 
@@ -40,7 +42,7 @@
 #define BM_F_ReadMsrdVals 50
 #define BM_F_ReadSetVals  51
 
-#define checksum(int a) ((a%255)+1)
+#define checksum(a) ((a%255)+1)
 
 typedef enum {
         reading,
@@ -125,8 +127,8 @@ typedef struct{
 }setValues_t;
 
 class BatteryMonitor{
-  public
-  BatteryMonitor(uint8_t address, Stream &serialDevice);
+  public:
+  BatteryMonitor(int address, Stream *SerialDevice);
   ~BatteryMonitor();
   void
     changeAddress(uint8_t newAddress),
@@ -163,7 +165,7 @@ class BatteryMonitor{
     getVoltageScale(),
     getCurrentScale();
 
-float
+  float
     getVoltage(),
     getCurrent(),
     getInternalResistance(),
@@ -176,7 +178,7 @@ float
     getOCPReverseCurrent(),
     getOPPPower();
 
-  private
+  private:
   void
     getBasicInfo(),
     getMeasuredValues(),
@@ -184,13 +186,13 @@ float
   String 
     readMessage(),
     getStringField(String message, int idx);
-;
+
 
   setValues_t       setValues;
   measuredValues_t  measuredValues;
   basicInfo_t       basicInfo;
-  int               bm_address
-  Stream            bm_serial;
-}
+  int               bm_address;
+  Stream            &bm_serial;
+};
 
 #endif
