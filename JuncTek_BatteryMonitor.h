@@ -128,7 +128,8 @@ typedef struct{
 
 class BatteryMonitor{
   public:
-  BatteryMonitor(int address, Stream *SerialDevice);
+  BatteryMonitor(int address, Stream &SerialDevice);
+  BatteryMonitor(int address, HardwareSerial &SerialDevice);
   ~BatteryMonitor();
   void
     changeAddress(uint8_t newAddress),

@@ -1,7 +1,15 @@
   
 
-void BatteryMonitor(int address, Stream *serialDevice){
-  bm_serial=serialDevice;
+void BatteryMonitor(int address, Stream &serialDevice){
+  Stream bm_serial=serialDevice;
+  bm_address=address;
+  setValues.deviceAddress=bm_address;
+  basicInfo.deviceAddress=bm_address;
+  measuredValues.deviceAddress=bm_address;
+  
+}
+void BatteryMonitor(int address, HardwareSerial &serialDevice){
+  HardwareSerial bm_serial=serialDevice;
   bm_address=address;
   setValues.deviceAddress=bm_address;
   basicInfo.deviceAddress=bm_address;
