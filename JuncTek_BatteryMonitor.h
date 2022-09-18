@@ -11,7 +11,7 @@
 
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
-//#define DEBUG
+#define DEBUG
 
 /* Format:
  *  
@@ -85,7 +85,8 @@ typedef struct {
         batteryLifeLeft,
         temperature,
         outputState,
-        currentDir;
+        currentDir,
+        lastReadTime;
 
     float
         voltage,
@@ -164,7 +165,8 @@ class BatteryMonitor{
     setCurrentMultiplier(int currentMultiplier),
     setBatteryPercent(uint8_t batteryPercent),
     zeroCurrent(),
-    clearAccountingData();
+    clearAccountingData(),
+    setCacheTime(int);
 
   int 
     getUptime(),
@@ -179,7 +181,8 @@ class BatteryMonitor{
     getCurrentCalibration(),
     getTemperatureCalibration(),
     getVoltageScale(),
-    getCurrentScale();
+    getCurrentScale(),
+    getCacheTime();
 
   float
     getVoltage(),
@@ -208,12 +211,14 @@ class BatteryMonitor{
     debug(char c),
     debug(String &msg),
     debug(int i);
+  bool
+  	 checkCache();
 
   Stream 			  *bm_serial;
   setValues_t       setValues;
   measuredValues_t  measuredValues;
   basicInfo_t       basicInfo;
-  int               bm_address;
+  int               bm_address, cacheTime;
   //Stream            &bm_serial;
 };
 

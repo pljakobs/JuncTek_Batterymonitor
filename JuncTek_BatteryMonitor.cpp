@@ -6,11 +6,12 @@ BatteryMonitor::BatteryMonitor(int address, Stream &serialDevice){
   setValues.deviceAddress=bm_address;
   basicInfo.deviceAddress=bm_address;
   measuredValues.deviceAddress=bm_address;
+  cacheTime=100; //cache for 100ms unless changed
   getBasicInfo();
   
-  Serial.printf("=== Battery Monitor basic info ===\nmax Voltage: %i\nmax Current: %i\nSensor Type: %i\nVersion    : %i\nSerial Nr : %i",  basicInfo.maxVoltage, basicInfo.maxCurrent,basicInfo.sensorType,basicInfo.deviceVersion,basicInfo.deviceSerialNumber);
+  //Serial.printf("=== Battery Monitor basic info ===\nmax Voltage: %i\nmax Current: %i\nSensor Type: %i\nVersion    : %i\nSerial Nr : %i",  basicInfo.maxVoltage, basicInfo.maxCurrent,basicInfo.sensorType,basicInfo.deviceVersion,basicInfo.deviceSerialNumber);
   getMeasuredValues();
-  Serial.printf("=== Battery Monitor measured values ===\nUptime: %i\nbattery life left: %i\nTemperature: %i\nVoltage: %f\nCurrent: %f\nint Resistanc: %f\nCapacity: %f\ncumulative capa: %f\nOutput State: %i\ncurrent direction: %i",measuredValues.uptime,measuredValues.batteryLifeLeft, measuredValues.temperature, measuredValues.voltage, measuredValues.current, measuredValues.internalResistance, measuredValues.remainingCapacity, measuredValues.cumulativeCapacity,measuredValues.outputState,measuredValues.currentDir);  
+  //Serial.printf("=== Battery Monitor measured values ===\nUptime: %i\nbattery life left: %i\nTemperature: %i\nVoltage: %f\nCurrent: %f\nint Resistanc: %f\nCapacity: %f\ncumulative capa: %f\nOutput State: %i\ncurrent direction: %i",measuredValues.uptime,measuredValues.batteryLifeLeft, measuredValues.temperature, measuredValues.voltage, measuredValues.current, measuredValues.internalResistance, measuredValues.remainingCapacity, measuredValues.cumulativeCapacity,measuredValues.outputState,measuredValues.currentDir);  
 }
 
 BatteryMonitor::~BatteryMonitor(){
@@ -72,13 +73,16 @@ void BatteryMonitor::clearAccountingData(){
 }
 
 int BatteryMonitor::getUptime(){
+  getMeasuredValues();
   return measuredValues.uptime;
 }
 int BatteryMonitor::getBatteryLifeLeft(){
-  return measuredValues.batteryLifeLeft;
+    getMeasuredValues();
+    return measuredValues.batteryLifeLeft;
 }
 int BatteryMonitor::getTemperature(){
-  return measuredValues.temperature;
+    getMeasuredValues();
+    return measuredValues.temperature;
 }
    
 int BatteryMonitor::getProtectionTemperature(){
@@ -94,8 +98,9 @@ int BatteryMonitor::getProtectionDelayTime(){
   return time;
 }
 int BatteryMonitor::getCapacity(){
-  int capa;
-  return capa;
+  //getMeasuredValues();
+  //return measuredValues.remainingCapacity;
+  return 0;
 }
 int BatteryMonitor::getVoltageCalibration(){
   int volt;
@@ -119,24 +124,24 @@ int BatteryMonitor::getCurrentScale(){
 }
 
 float BatteryMonitor::getVoltage() {
-  float volt;
-  return volt;
+  getMeasuredValues();
+  return measuredValues.voltage;
 }
 float BatteryMonitor::getCurrent(){
-  float curr;
-  return curr;
+  getMeasuredValues();
+  return measuredValues.current;
 }
 float BatteryMonitor::getInternalResistance(){
-  float res;
-  return res;
+  getMeasuredValues();
+  return measuredValues.internalResistance;
 }
 float BatteryMonitor::getRemainingCapacity(){
-  float capa;
-  return capa;
+  getMeasuredValues();
+  return measuredValues.remainingCapacity;
 }
 float BatteryMonitor::getCumulativeCapacity(){
-  float capa;
-  return capa;
+  getMeasuredValues();
+  return measuredValues.cumulativeCapacity;
 }
 
 float BatteryMonitor::getOVPVoltage(){
@@ -192,42 +197,45 @@ void BatteryMonitor::getBasicInfo(){
 }
 void BatteryMonitor::getMeasuredValues(){
   String message;
-  sendMessage(bm_address, BM_F_ReadMsrdVals, 1);
-  message=readMessage();
-
-  /*
-  * :r50=<addr>,
-  * 01 - <addr>
-  * 02 - <checksum>,
-  * 03 - <Voltage (1/100V)>,
-  * 04 - <Current (1/100A)>,
-  * 05 - <remaining capacity mAh>,
-  * 06 - <cumulative capacity mAh>,
-  * 07 - <Capacity (mWh)>,
-  * 08 - <running time (s)>,
-  * 09 - <temperature (°C+100)>,
-  * 10 - <reserved>,
-  * 11 - <output State>,
-  * 12 - <current direction>,
-  * 13 - <remaining battery life (minutes)>,
-  * 14 - <internal resistance (mOhm/100)>
-  */
-  debug("get uptime");
-  measuredValues.uptime=getStringField(message,8).toInt();
-  debug("get battery life left");
-  measuredValues.batteryLifeLeft=getStringField(message,13).toInt();
-  debug("get temperature");
-  measuredValues.temperature=getStringField(message,9).toInt()-100;
-
-  debug("get Voltage");
-  measuredValues.voltage=getStringField(message,3).toFloat()/100;
-  measuredValues.current=getStringField(message,4).toFloat()/100;
-  measuredValues.internalResistance=getStringField(message,14).toFloat()/100;
-  measuredValues.remainingCapacity=getStringField(message,5).toFloat()/1000;
-  measuredValues.cumulativeCapacity=getStringField(message,5).toFloat()/1000;
-
-  measuredValues.outputState=getStringField(message,11).toInt();
-  measuredValues.currentDir=getStringField(message,12).toInt();
+  if(!checkCache()){
+	  sendMessage(bm_address, BM_F_ReadMsrdVals, 1);
+	  message=readMessage();
+	
+	  /*
+	  * :r50=<addr>,
+	  * 01 - <addr>
+	  * 02 - <checksum>,
+	  * 03 - <Voltage (1/100V)>,
+	  * 04 - <Current (1/100A)>,
+	  * 05 - <remaining capacity mAh>,
+	  * 06 - <cumulative capacity mAh>,
+	  * 07 - <Capacity (mWh)>,
+	  * 08 - <running time (s)>,
+	  * 09 - <temperature (°C+100)>,
+	  * 10 - <reserved>,
+	  * 11 - <output State>,
+	  * 12 - <current direction>,
+	  * 13 - <remaining battery life (minutes)>,
+	  * 14 - <internal resistance (mOhm/100)>
+	  */
+	  debug("get uptime");
+	  measuredValues.uptime=getStringField(message,8).toInt();
+	  debug("get battery life left");
+	  measuredValues.batteryLifeLeft=getStringField(message,13).toInt();
+	  debug("get temperature");
+	  measuredValues.temperature=getStringField(message,9).toInt()-100;
+	
+	  debug("get Voltage");
+	  measuredValues.voltage=getStringField(message,3).toFloat()/100;
+	  measuredValues.current=getStringField(message,4).toFloat()/100;
+	  measuredValues.internalResistance=getStringField(message,14).toFloat()/100;
+	  measuredValues.remainingCapacity=getStringField(message,5).toFloat()/1000;
+	  measuredValues.cumulativeCapacity=getStringField(message,5).toFloat()/1000;
+	
+	  measuredValues.outputState=getStringField(message,11).toInt();
+	  measuredValues.currentDir=getStringField(message,12).toInt();
+	  measuredValues.lastReadTime=millis();
+	}
 }
 void BatteryMonitor::getSetValues(){
   
@@ -295,6 +303,17 @@ String BatteryMonitor::readMessage(){
     debug("finished read message\nmessage:");
     debug(_message);
     return _message;
+}
+void BatteryMonitor::setCacheTime(int cTime){
+	cacheTime=cTime;
+	}
+	
+int BatteryMonitor::getCacheTime(){
+	return cacheTime;
+}
+
+bool BatteryMonitor::checkCache(){
+	return(millis()-measuredValues.lastReadTime<cacheTime);
 }
 
 void BatteryMonitor::debug(const char msg[]){
