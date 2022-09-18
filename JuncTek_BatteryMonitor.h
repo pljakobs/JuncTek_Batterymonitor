@@ -1,10 +1,17 @@
 #ifndef _BATTERYMONITORH_
 #define _BATTERYMONITORH_
 
-#include "Stream.h"
+#ifndef Stream_h
+#include <Stream.h>
+#endif 
+
+#ifndef HardwareSerial_h
+#include <HardwareSerial.h>
+#endif
 
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
+//#define DEBUG
 
 /* Format:
  *  
@@ -19,6 +26,8 @@
  *  
  */
  
+#define SERIAL_TIMEOUT	  1000 // timeout to wait for a return message in ms
+
 #define BM_F_SetAddress   01
 #define BM_F_TurnOnOutput 10
 #define BM_F_SetOVProt    20
@@ -55,13 +64,14 @@ typedef  struct{
         deviceAddress,
         checksum,
         maxVoltage,
-        maxCurrent;
-
-    enum sensorType{
-        HALLSENSOR = 1,
-        SAMPLER=2
-    };
-    
+        maxCurrent,
+		  sensorType;
+    /*
+    *  enum sensorType{
+    *    HALLSENSOR = 1,
+    *    SAMPLER=2
+    *};
+    */
     int deviceVersion;
     int deviceSerialNumber;
 } basicInfo_t;
@@ -73,7 +83,9 @@ typedef struct {
         checksum,    
         uptime,
         batteryLifeLeft,
-        temperature;
+        temperature,
+        outputState,
+        currentDir;
 
     float
         voltage,
@@ -81,22 +93,24 @@ typedef struct {
         internalResistance,
         remainingCapacity,
         cumulativeCapacity;
-
-    enum outputState{
-        ON = 0,
-        OVP = 1,
-        OCP = 2,
-        LVP = 3,
-        NCP = 4,
-        OPP = 5,
-        OTP = 6,
-        OFF =255
-    };
-
-    enum currentDir{
-        discharging = 0,
-        charging =1
-    };
+	/*
+   * enum outputState{
+   *     ON = 0,
+   *     OVP = 1,
+   *     OCP = 2,
+   *     LVP = 3,
+   *     NCP = 4,
+   *     OPP = 5,
+   *     OTP = 6,
+   *     OFF =255
+   * };
+   *
+	*
+   * enum currentDir{
+   *     discharging = 0,
+   *     charging =1
+   * };
+   */
 }measuredValues_t;
 
 typedef struct{
@@ -128,11 +142,12 @@ typedef struct{
 
 class BatteryMonitor{
   public:
+  
   BatteryMonitor(int address, Stream &SerialDevice);
-  BatteryMonitor(int address, HardwareSerial &SerialDevice);
+  //BatteryMonitor(int address, HardwareSerial &SerialDevice);
   ~BatteryMonitor();
   void
-    changeAddress(uint8_t newAddress),
+    setAddress(uint8_t newAddress),
     setOutoupt(bool output),
     setOverVoltageProtection(int voltage),
     setUnderVoltageProtection(int voltage),
@@ -180,20 +195,26 @@ class BatteryMonitor{
     getOPPPower();
 
   private:
+  String 
+      getStringField(String message, int idx),
+      readMessage();
   void
     getBasicInfo(),
     getMeasuredValues(),
-    getSetValues();
-  String 
-    readMessage(),
-    getStringField(String message, int idx);
+    getSetValues(),
+    sendMessage(int address, int command, int parameter),
+    debug(const char msg[]),
+    debug(char msg[]),
+    debug(char c),
+    debug(String &msg),
+    debug(int i);
 
-
+  Stream 			  *bm_serial;
   setValues_t       setValues;
   measuredValues_t  measuredValues;
   basicInfo_t       basicInfo;
   int               bm_address;
-  Stream            &bm_serial;
+  //Stream            &bm_serial;
 };
 
 #endif
