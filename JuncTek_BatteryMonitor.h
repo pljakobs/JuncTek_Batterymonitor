@@ -27,15 +27,25 @@
  */
  
 #define SERIAL_TIMEOUT	  1000 // timeout to wait for a return message in ms
+#define CACHE_TIME			100 // cache time. If you request a measured value 
+										 // and more than CACHE_TIME milliseconds have elapsed
+										 // since that value was last read, the library will 
+										 // automatically re-read all values. Reading all messages
+										 // takes roughly 50ms, so sampling more than 20 times per
+										 // second is pointless
+										 // the actual cache time can be set through the setCacheTime(millis) 
+										 // function. A higher cache time would be useful to make sure 
+										 // consistent values are being read even if the actual calls to
+										 // get the different values are spaced farther apart.
 
 #define BM_F_SetAddress   01
 #define BM_F_TurnOnOutput 10
 #define BM_F_SetOVProt    20
 #define BM_F_SetUVProt    21
-#define BM_F_SetOCProt    22
-#define BM_F_SetUCProt    23
+#define BM_F_SetPOCProt   22
+#define BM_F_SetNOCProt   23
 #define BM_F_SetOPProt    24
-#define BM_F_SetUPProt    25
+#define BM_F_SetOTProt    25
 #define BM_F_SetBattCapa  28
 #define BM_F_SetVoltCalbr 29
 #define BM_F_SetCurrCalbr 30
@@ -144,22 +154,37 @@ typedef struct{
 class BatteryMonitor{
   public:
   
-  BatteryMonitor(int address, Stream &SerialDevice);
+  BatteryMonitor();
   //BatteryMonitor(int address, HardwareSerial &SerialDevice);
   ~BatteryMonitor();
   void
-    setAddress(uint8_t newAddress),
-    setOutoupt(bool output),
+  	 begin(int address, Stream &SerialDevice),
+    setNewAddress(uint8_t newAddress),
+    setOutput(bool output),
     setOverVoltageProtection(int voltage),
     setUnderVoltageProtection(int voltage),
-    setOverCurrentProtection(int current),
-    setUnderCurrentProtection(int current),
+    setPositiveOverCurrentProtection(int current),
+    setNegativeOverCurrentProtection(int current),
     setOverPowerProtection(int power),
-    setUnderPowerProtection(int power),
+    setOverTemperatureProtection(int temperature),
+    
+    setOverVoltageProtection(float voltage),
+    setUnderVoltageProtection(float voltage),
+    setPositiveOverCurrentProtection(float current),
+    setNegativeOverCurrentProtection(float current),
+    setOverPowerProtection(float power),
+    setOverTemperatureProtection(float temperature),
+
     setBatteryCapacity(int capacity),
     setVoltageCalibration(int calibrationVoltage),
     setCurrentCalibration(int calibrationCurrent),
     setTemperatureCalibration(int calibrationTemperature),
+	 
+	 setBatteryCapacity(float capacity),
+	 setVoltageCalibration(float calibrationVoltage),
+    setCurrentCalibration(float calibrationCurrent),
+    setTemperatureCalibration(float calibrationTemperature),
+        
     setRelayType(int relayType),
     resetFactorySettings(),
     setCurrentMultiplier(int currentMultiplier),

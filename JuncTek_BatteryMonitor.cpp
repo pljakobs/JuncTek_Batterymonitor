@@ -1,12 +1,18 @@
   #include "JuncTek_BatteryMonitor.h"
 
-BatteryMonitor::BatteryMonitor(int address, Stream &serialDevice){
+BatteryMonitor::BatteryMonitor(){
+//empty constructor
+}
+BatteryMonitor::~BatteryMonitor(){
+  
+}
+void BatteryMonitor::begin(int address, Stream &serialDevice){
   bm_serial=&serialDevice;
   bm_address=address;
   setValues.deviceAddress=bm_address;
   basicInfo.deviceAddress=bm_address;
   measuredValues.deviceAddress=bm_address;
-  cacheTime=100; //cache for 100ms unless changed
+  cacheTime=CACHE_TIME; 
   getBasicInfo();
   
   //Serial.printf("=== Battery Monitor basic info ===\nmax Voltage: %i\nmax Current: %i\nSensor Type: %i\nVersion    : %i\nSerial Nr : %i",  basicInfo.maxVoltage, basicInfo.maxCurrent,basicInfo.sensorType,basicInfo.deviceVersion,basicInfo.deviceSerialNumber);
@@ -14,35 +20,77 @@ BatteryMonitor::BatteryMonitor(int address, Stream &serialDevice){
   //Serial.printf("=== Battery Monitor measured values ===\nUptime: %i\nbattery life left: %i\nTemperature: %i\nVoltage: %f\nCurrent: %f\nint Resistanc: %f\nCapacity: %f\ncumulative capa: %f\nOutput State: %i\ncurrent direction: %i",measuredValues.uptime,measuredValues.batteryLifeLeft, measuredValues.temperature, measuredValues.voltage, measuredValues.current, measuredValues.internalResistance, measuredValues.remainingCapacity, measuredValues.cumulativeCapacity,measuredValues.outputState,measuredValues.currentDir);  
 }
 
-BatteryMonitor::~BatteryMonitor(){
-  
-}
-void BatteryMonitor::setAddress(uint8_t newAddress){
+void BatteryMonitor::setNewAddress(uint8_t newAddress){
     
 }
-void BatteryMonitor::setOutoupt(bool output){
-    
-  }
+void BatteryMonitor::setOutput(bool output){
+	if(output){
+   	sendMessage(bm_address, BM_F_TurnOnOutput, 1);
+   }else{
+   	sendMessage(bm_address, BM_F_TurnOnOutput, 0);
+   }
+}
 void BatteryMonitor::setOverVoltageProtection(int voltage){
-  
+	int v=(int)(voltage*100);
+	sendMessage(bm_address, BM_F_SetOVProt, v);
 }
+void BatteryMonitor::setOverVoltageProtection(float voltage){
+	int v=(int)(voltage*100);
+	sendMessage(bm_address, BM_F_SetOVProt, v);
+}
+
 void BatteryMonitor::setUnderVoltageProtection(int voltage){
-  
+  	int v=(int)(voltage*100);
+	sendMessage(bm_address, BM_F_SetUVProt, v);
 }
-void BatteryMonitor::setOverCurrentProtection(int current){
-  
+void BatteryMonitor::setUnderVoltageProtection(float voltage){
+  	int v=(int)(voltage*100);
+	sendMessage(bm_address, BM_F_SetUVProt, v);
 }
-void BatteryMonitor::setUnderCurrentProtection(int current){
-  
+
+void BatteryMonitor::setPositiveOverCurrentProtection(int current){
+  	int c=(int)(current*100);
+  	sendMessage(bm_address, BM_F_SetPOCProt, c);
 }
+void BatteryMonitor::setPositiveOverCurrentProtection(float current){
+  	int c=(int)(current*100);
+  	sendMessage(bm_address, BM_F_SetPOCProt, c);
+}
+
+void BatteryMonitor::setNegativeOverCurrentProtection(int current){
+   int c=(int)(current*100);
+  	sendMessage(bm_address, BM_F_SetNOCProt, c);
+}
+void BatteryMonitor::setNegativeOverCurrentProtection(float current){
+   int c=(int)(current*100);
+  	sendMessage(bm_address, BM_F_SetNOCProt, c);
+}
+
 void BatteryMonitor::setOverPowerProtection(int power){
-  
+   int p=(int)(power*100);
+  	sendMessage(bm_address, BM_F_SetOPProt, p);
 }
-void BatteryMonitor::setUnderPowerProtection(int power){
-  
+void BatteryMonitor::setOverPowerProtection(float power){
+   int p=(int)(power*100);
+  	sendMessage(bm_address, BM_F_SetOPProt, p);
 }
+
+void BatteryMonitor::setOverTemperatureProtection(int temperature){
+   int t=temperature+100;
+  	sendMessage(bm_address, BM_F_SetOTProt, t);
+}
+void BatteryMonitor::setOverTemperatureProtection(float temperature){
+   int t=(int)(temperature+100);
+  	sendMessage(bm_address, BM_F_SetOTProt, t);
+}
+
 void BatteryMonitor::setBatteryCapacity(int capacity){
-  
+	int c=capacity*10;
+	sendMessage(bm_address, BM_F_SetBattCapa, c);
+}
+void BatteryMonitor::setBatteryCapacity(float capacity){
+	int c=(int)(capacity*10);
+	sendMessage(bm_address, BM_F_SetBattCapa, c);
 }
 void BatteryMonitor::setVoltageCalibration(int calibrationVoltage){
   
@@ -238,7 +286,67 @@ void BatteryMonitor::getMeasuredValues(){
 	}
 }
 void BatteryMonitor::getSetValues(){
-  
+	String message;	
+	sendMessage(bm_address, BM_F_ReadSetVals,1)
+  	message=readMessage();
+  	/*
+  		 1: deviceAddress
+  		 2: checksum
+  		 3: OVPVoltage
+  		 4: UVPVoltage
+  		 5: OCPForwardCurrent
+  		 6: OCPReverseCurrent
+  		 7: OPPPower
+  		 8: protectionTemperature
+  		 9: protectionRecoveryTime
+  		10: protectionDelayTime
+  		11: presentCapacity
+  		12: voltageCalibration
+  		13: currentCalibration
+  		14: temperatureCalibration
+  		15: reserved
+  		16: relayType
+  		17: currentMultiple
+  		18: voltageScale
+  		19: currentScale
+  	*/
+  	
+  	setValues.OVPVoltage					=	getStringField(message, 3).toFloat()/100;
+  	setValues.UVPVoltage					=	getStringField(message, 4).toFloat()/100;
+  	setValues.OCPForwardCurrent		=	getStringField(message, 5).toFloat/100;
+  	setValues.OCPReverseCurrent		=	getStringField(message, 6).toFloat/100;
+  	setValues.OPPPower					=	getStringField(message, 7).toFloat()/100;
+  	setValues.protectionTemperature	=	getStringField(message, 8).toInt()-100;
+  	setValues.protectionRecoveryTime	=	getStringField(message, 9).toInt();
+	setValues.protectionDelayTime		=	getStringField(message,10).toInt();
+	setValues.presentCapacity			=	getStringField(message,11).
+  	
+  	setValues.voltageScale				=	getStringField(message.)
+  	/*
+  	    int 
+        deviceAddress,
+        checksum,
+        protectionTemperature,
+        protectionRecoveryTime,
+        protectionDelayTime,
+        presetCapacity,
+        voltageCalibration,
+        currentCalibration,
+        temperatureCalibration,
+        voltageScale,
+        currentScale;
+
+    float        
+        OVPVoltage,
+        UVPVoltage,
+        OCPForwardCurrent,
+        OCPReverseCurrent,
+        OPPPower;
+
+    enum relayType{
+        normallyOpen=0,
+        normallyClosed=1
+   */
 }
 
 String BatteryMonitor::getStringField(String message, int idx){
