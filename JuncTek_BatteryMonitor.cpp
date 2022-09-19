@@ -36,7 +36,7 @@ void BatteryMonitor::setOverVoltageProtection(int voltage){
 }
 void BatteryMonitor::setOverVoltageProtection(float voltage){
 	int v=(int)(voltage*100);
-	sendMessage(bm_address, BM_F_SetOVProt, v);
+	sendMessage(bm_address,BM_F_SetOVProt, v);
 }
 
 void BatteryMonitor::setUnderVoltageProtection(int voltage){
@@ -104,14 +104,19 @@ void BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
 void BatteryMonitor::setRelayType(int relayType){
   
 }
+/*
+void BatteryMonitor::setPresetCapacity(int capacity){
+	int 
+}
+*/
 void BatteryMonitor::resetFactorySettings(){
   
 }
 void BatteryMonitor::setCurrentMultiplier(int currentMultiplier){
   
 }
-void BatteryMonitor::setBatteryPercent(uint8_t batteryPercent){
-  
+void BatteryMonitor::setBatteryPercent(int batteryPercent){
+	if(batteryPercent >=0 && batteryPercent<=100) sendMessage(bm_address,BM_F_SetBattPerc,batteryPercent);
 }
 void BatteryMonitor::zeroCurrent(){
   
@@ -145,10 +150,8 @@ int BatteryMonitor::getProtectionDelayTime(){
   int time;
   return time;
 }
-int BatteryMonitor::getCapacity(){
-  //getMeasuredValues();
-  //return measuredValues.remainingCapacity;
-  return 0;
+int BatteryMonitor::getPresetCapacity(){
+  return setValues.presetCapacity/10;
 }
 int BatteryMonitor::getVoltageCalibration(){
   int volt;
@@ -171,6 +174,9 @@ int BatteryMonitor::getCurrentScale(){
   return scale;
 }
 
+int BatteryMonitor::getRelayType(){
+	return setValues.relayType;
+}
 float BatteryMonitor::getVoltage() {
   getMeasuredValues();
   return measuredValues.voltage;
@@ -287,7 +293,7 @@ void BatteryMonitor::getMeasuredValues(){
 }
 void BatteryMonitor::getSetValues(){
 	String message;	
-	sendMessage(bm_address, BM_F_ReadSetVals,1)
+	sendMessage(bm_address, BM_F_ReadSetVals,1);
   	message=readMessage();
   	/*
   		 1: deviceAddress
@@ -300,7 +306,7 @@ void BatteryMonitor::getSetValues(){
   		 8: protectionTemperature
   		 9: protectionRecoveryTime
   		10: protectionDelayTime
-  		11: presentCapacity
+  		11: presetCapacity
   		12: voltageCalibration
   		13: currentCalibration
   		14: temperatureCalibration
@@ -313,15 +319,17 @@ void BatteryMonitor::getSetValues(){
   	
   	setValues.OVPVoltage					=	getStringField(message, 3).toFloat()/100;
   	setValues.UVPVoltage					=	getStringField(message, 4).toFloat()/100;
-  	setValues.OCPForwardCurrent		=	getStringField(message, 5).toFloat/100;
-  	setValues.OCPReverseCurrent		=	getStringField(message, 6).toFloat/100;
+  	setValues.OCPForwardCurrent		=	getStringField(message, 5).toFloat()/100;
+  	setValues.OCPReverseCurrent		=	getStringField(message, 6).toFloat()/100;
   	setValues.OPPPower					=	getStringField(message, 7).toFloat()/100;
   	setValues.protectionTemperature	=	getStringField(message, 8).toInt()-100;
   	setValues.protectionRecoveryTime	=	getStringField(message, 9).toInt();
 	setValues.protectionDelayTime		=	getStringField(message,10).toInt();
-	setValues.presentCapacity			=	getStringField(message,11).
+	setValues.presetCapacity			=	getStringField(message,11).toInt();
   	
-  	setValues.voltageScale				=	getStringField(message.)
+  	setValues.voltageScale				=	getStringField(message,18).toInt();
+  	setValues.currentScale				=	getStringField(message,19).toInt();
+  	setValues.relayType					=	getStringField(message,16).toInt();
   	/*
   	    int 
         deviceAddress,
@@ -373,10 +381,19 @@ String BatteryMonitor::getStringField(String message, int idx){
 
 void BatteryMonitor::sendMessage(int address, int command, int parameter){
   char message[40];
-  debug("sendMessage\nrequest:");
-  sprintf(message, ":R%02i=%i,%i,%i,\r\n", command, address, checksum(parameter), parameter);
-  debug(message);
-  bm_serial->print(message);
+  switch(command){
+  	case BM_F_ReadBasicInf:
+	case BM_F_ReadMsrdVals:
+	case BM_F_ReadSetVals:
+		sprintf(message, ":R%02i=%i,%i,%i,\r\n", command, address, checksum(parameter), parameter);
+		break;
+	default:
+		sprintf(message, ":W%02i=%i,%i,%i,\r\n", command, address, checksum(parameter), parameter);
+	}
+    debug("sendMessage\nrequest:");
+	 //sprintf(message, ":%c%02i=%i,%i,%i,\r\n", dir, command, address, checksum(parameter), parameter);
+	 debug(message);
+	 bm_serial->print(message);
 }
 
 String BatteryMonitor::readMessage(){   

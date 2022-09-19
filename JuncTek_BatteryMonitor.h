@@ -136,7 +136,8 @@ typedef struct{
         currentCalibration,
         temperatureCalibration,
         voltageScale,
-        currentScale;
+        currentScale,
+        relayType;
 
     float        
         OVPVoltage,
@@ -144,11 +145,13 @@ typedef struct{
         OCPForwardCurrent,
         OCPReverseCurrent,
         OPPPower;
-
+	 /*
     enum relayType{
         normallyOpen=0,
         normallyClosed=1
+
     };
+    */
 }setValues_t;
 
 class BatteryMonitor{
@@ -158,6 +161,9 @@ class BatteryMonitor{
   //BatteryMonitor(int address, HardwareSerial &SerialDevice);
   ~BatteryMonitor();
   void
+    getBasicInfo(),
+    getMeasuredValues(),
+    getSetValues(),
   	 begin(int address, Stream &SerialDevice),
     setNewAddress(uint8_t newAddress),
     setOutput(bool output),
@@ -184,11 +190,11 @@ class BatteryMonitor{
 	 setVoltageCalibration(float calibrationVoltage),
     setCurrentCalibration(float calibrationCurrent),
     setTemperatureCalibration(float calibrationTemperature),
-        
+    //setPresetCapacity(int capacity,)
     setRelayType(int relayType),
     resetFactorySettings(),
     setCurrentMultiplier(int currentMultiplier),
-    setBatteryPercent(uint8_t batteryPercent),
+    setBatteryPercent(int batteryPercent),
     zeroCurrent(),
     clearAccountingData(),
     setCacheTime(int);
@@ -201,13 +207,14 @@ class BatteryMonitor{
     getProtectionTemperature(),
     getProtectionRecoveryTime(),
     getProtectionDelayTime(),
-    getCapacity(),
+    getPresetCapacity(),
     getVoltageCalibration(),
     getCurrentCalibration(),
     getTemperatureCalibration(),
     getVoltageScale(),
     getCurrentScale(),
-    getCacheTime();
+    getCacheTime(),
+    getRelayType();
 
   float
     getVoltage(),
@@ -227,9 +234,7 @@ class BatteryMonitor{
       getStringField(String message, int idx),
       readMessage();
   void
-    getBasicInfo(),
-    getMeasuredValues(),
-    getSetValues(),
+
     sendMessage(int address, int command, int parameter),
     debug(const char msg[]),
     debug(char msg[]),
