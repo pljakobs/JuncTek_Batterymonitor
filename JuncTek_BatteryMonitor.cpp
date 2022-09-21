@@ -23,112 +23,126 @@ void BatteryMonitor::begin(int address, Stream &serialDevice){
 void BatteryMonitor::setNewAddress(uint8_t newAddress){
     
 }
-void BatteryMonitor::setOutput(bool output){
+bool BatteryMonitor::setOutput(bool output){
 	if(output){
-   	sendMessage(bm_address, BM_F_TurnOnOutput, 1);
+   	return sendCommand(bm_address, BM_F_TurnOnOutput, 1);
    }else{
-   	sendMessage(bm_address, BM_F_TurnOnOutput, 0);
+   	return sendCommand(bm_address, BM_F_TurnOnOutput, 0);
    }
 }
-void BatteryMonitor::setOverVoltageProtection(int voltage){
+bool BatteryMonitor::setOverVoltageProtection(int voltage){
 	int v=(int)(voltage*100);
-	sendMessage(bm_address, BM_F_SetOVProt, v);
+	return sendCommand(bm_address, BM_F_SetOVProt, v);
 }
-void BatteryMonitor::setOverVoltageProtection(float voltage){
+bool BatteryMonitor::setOverVoltageProtection(float voltage){
 	int v=(int)(voltage*100);
-	sendMessage(bm_address,BM_F_SetOVProt, v);
+	return sendCommand(bm_address,BM_F_SetOVProt, v);
 }
 
-void BatteryMonitor::setUnderVoltageProtection(int voltage){
+bool BatteryMonitor::setUnderVoltageProtection(int voltage){
   	int v=(int)(voltage*100);
-	sendMessage(bm_address, BM_F_SetUVProt, v);
+	return sendCommand(bm_address, BM_F_SetUVProt, v);
 }
-void BatteryMonitor::setUnderVoltageProtection(float voltage){
+bool BatteryMonitor::setUnderVoltageProtection(float voltage){
   	int v=(int)(voltage*100);
-	sendMessage(bm_address, BM_F_SetUVProt, v);
+	return sendCommand(bm_address, BM_F_SetUVProt, v);
 }
 
-void BatteryMonitor::setPositiveOverCurrentProtection(int current){
+bool BatteryMonitor::setPositiveOverCurrentProtection(int current){
   	int c=(int)(current*100);
-  	sendMessage(bm_address, BM_F_SetPOCProt, c);
+  	return sendCommand(bm_address, BM_F_SetPOCProt, c);
 }
-void BatteryMonitor::setPositiveOverCurrentProtection(float current){
+bool BatteryMonitor::setPositiveOverCurrentProtection(float current){
   	int c=(int)(current*100);
-  	sendMessage(bm_address, BM_F_SetPOCProt, c);
+  	return sendCommand(bm_address, BM_F_SetPOCProt, c);
 }
 
-void BatteryMonitor::setNegativeOverCurrentProtection(int current){
+bool BatteryMonitor::setNegativeOverCurrentProtection(int current){
    int c=(int)(current*100);
-  	sendMessage(bm_address, BM_F_SetNOCProt, c);
+  	return sendCommand(bm_address, BM_F_SetNOCProt, c);
 }
-void BatteryMonitor::setNegativeOverCurrentProtection(float current){
+bool BatteryMonitor::setNegativeOverCurrentProtection(float current){
    int c=(int)(current*100);
-  	sendMessage(bm_address, BM_F_SetNOCProt, c);
+  	return sendCommand(bm_address, BM_F_SetNOCProt, c);
 }
 
-void BatteryMonitor::setOverPowerProtection(int power){
+bool BatteryMonitor::setOverPowerProtection(int power){
    int p=(int)(power*100);
-  	sendMessage(bm_address, BM_F_SetOPProt, p);
+  	return sendCommand(bm_address, BM_F_SetOPProt, p);
 }
-void BatteryMonitor::setOverPowerProtection(float power){
+bool BatteryMonitor::setOverPowerProtection(float power){
    int p=(int)(power*100);
-  	sendMessage(bm_address, BM_F_SetOPProt, p);
+  	return sendCommand(bm_address, BM_F_SetOPProt, p);
 }
 
-void BatteryMonitor::setOverTemperatureProtection(int temperature){
+bool BatteryMonitor::setOverTemperatureProtection(int temperature){
    int t=temperature+100;
-  	sendMessage(bm_address, BM_F_SetOTProt, t);
-}
-void BatteryMonitor::setOverTemperatureProtection(float temperature){
-   int t=(int)(temperature+100);
-  	sendMessage(bm_address, BM_F_SetOTProt, t);
+  	return sendCommand(bm_address, BM_F_SetOTProt, t);
 }
 
-void BatteryMonitor::setBatteryCapacity(int capacity){
+bool BatteryMonitor::setOverTemperatureProtection(float temperature){
+   int t=(int)(temperature+100);
+  	return sendCommand(bm_address, BM_F_SetOTProt, t);
+}
+
+bool BatteryMonitor::setBatteryCapacity(int capacity){
 	int c=capacity*10;
-	sendMessage(bm_address, BM_F_SetBattCapa, c);
+	return sendCommand(bm_address, BM_F_SetBattCapa, c);	
 }
-void BatteryMonitor::setBatteryCapacity(float capacity){
+bool BatteryMonitor::setBatteryCapacity(float capacity){
 	int c=(int)(capacity*10);
-	sendMessage(bm_address, BM_F_SetBattCapa, c);
+	return sendCommand(bm_address, BM_F_SetBattCapa, c);
 }
-void BatteryMonitor::setVoltageCalibration(int calibrationVoltage){
-  
+bool BatteryMonitor::setVoltageCalibration(int calibrationVoltage){
+	return sendCommand(bm_address, BM_F_SetVoltCalbr, calibrationVoltage);
 }
-void BatteryMonitor::setCurrentCalibration(int calibrationCurrent){
-  
+
+bool BatteryMonitor::setCurrentCalibration(int calibrationCurrent){
+	return sendCommand(bm_address, BM_F_SetCurrCalbr, calibrationCurrent);
 }
-void BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
-  
+
+bool BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
+	int t=calibrationTemperature+100;
+  	return sendCommand(bm_address, BM_F_SetTempCalbr,t );
 }
-void BatteryMonitor::setRelayType(int relayType){
-  
+
+bool BatteryMonitor::setRelayType(int relayType){
+  return sendCommand(bm_address, BM_F_SetRelayType, relayType);
 }
 /*
 void BatteryMonitor::setPresetCapacity(int capacity){
 	int 
 }
 */
-void BatteryMonitor::resetFactorySettings(){
-  
+bool BatteryMonitor::resetFactorySettings(){
+  sendMessage(bm_address, BM_F_ResumeFctSettings, 1);
+  delay(25);
+  getSetValues();
 }
-void BatteryMonitor::setCurrentMultiplier(int currentMultiplier){
-  
+bool BatteryMonitor::setCurrentMultiplier(int currentMultiplier){
+  return sendCommand(bm_address, BM_F_SetCurrMult, currentMultiplier);
 }
-void BatteryMonitor::setBatteryPercent(int batteryPercent){
-	if(batteryPercent >=0 && batteryPercent<=100) sendMessage(bm_address,BM_F_SetBattPerc,batteryPercent);
+
+bool BatteryMonitor::setBatteryPercent(int batteryPercent){
+	if(batteryPercent >=0 && batteryPercent<=100) {
+		return sendCommand(bm_address,BM_F_SetBattPerc,batteryPercent);
+	} else {
+		return false;
+	}
 }
 void BatteryMonitor::zeroCurrent(){
-  
+	sendMessage(bm_address, BM_F_ZeroCurrent, 1);
 }
-void BatteryMonitor::clearAccountingData(){
 
+void BatteryMonitor::clearAccountingData(){
+	sendMessage(bm_address, BM_F_ClearAccData, 1);
 }
 
 int BatteryMonitor::getUptime(){
   getMeasuredValues();
   return measuredValues.uptime;
 }
+
 int BatteryMonitor::getBatteryLifeLeft(){
     getMeasuredValues();
     return measuredValues.batteryLifeLeft;
@@ -198,25 +212,21 @@ float BatteryMonitor::getCumulativeCapacity(){
   return measuredValues.cumulativeCapacity;
 }
 
-float BatteryMonitor::getOVPVoltage(){
-  float voltage;
-  return voltage;
+float BatteryMonitor::getOverVoltageProtectionVoltage(){
+  getSetValues();  
+  return setValues.OVPVoltage;
 }
-float BatteryMonitor::getUVPVoltage(){
-  float voltage;
-  return voltage;
+float BatteryMonitor::getUnderVoltageProtectionVoltage(){
+  return setValues.UVPVoltage;
 }
-float BatteryMonitor::getOCPForwardCurrent(){
-  float curr;
-  return curr;
+float BatteryMonitor::getOverCurrentProtectionForwardCurrent(){
+  return setValues.OCPForwardCurrent;
 }
-float BatteryMonitor::getOCPReverseCurrent(){
-  float curr;
-  return curr;
+float BatteryMonitor::getOverCurrentProtectionReverseCurrent(){
+  return setValues.OCPReverseCurrent;
 }
-float BatteryMonitor::getOPPPower(){
-  float power;
-  return power;
+float BatteryMonitor::getOverPowerProtectionPower(){
+  return setValues.OPPPower;
 }
 
 
@@ -355,6 +365,29 @@ void BatteryMonitor::getSetValues(){
         normallyOpen=0,
         normallyClosed=1
    */
+}
+
+bool BatteryMonitor::sendCommand(int address, int command, int parameter){
+	String message;
+	int command_r, address_r, checksum_r, parameter_r; //values as read back
+	char verb;	
+	
+	sendMessage(bm_address, command, parameter);
+	message=readMessage();
+
+	verb			=	message.substr(2,3).toChar();
+	command_r	=	message.substr(3,5)toInt();
+	address_r   =	getStringField(message, 1).toInt();
+	checksum_r  =	getStringField(message, 2).toInt();
+	parameter_r =	getStringField(message, 3).toInt();
+	#ifdef DEBUG
+	Serial.printf("==== verify command ====\n\t\t\tsent:\t|\t\treceived\n\tverb\t:\t%i\t|\t\t W\n\tcommand\t:%i\t|\t\t %i\n\taddress\t:%i\t|\t\t %i\n\tchecksum\t:\t%i\t|\t\t %i\n\tparameter\t:\t%i\t\|\t\t %i\n\n", verb,command,command_r,address,address_r,checksum(parameter),checksum_r,parameter,parameter_r);
+	#endif
+	if(verb=="w" && command_r==command && address_r==address && parameter_r==parameter && checksum(parameter)==checksum_r){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 String BatteryMonitor::getStringField(String message, int idx){

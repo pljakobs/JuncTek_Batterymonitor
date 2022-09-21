@@ -164,8 +164,15 @@ class BatteryMonitor{
     getBasicInfo(),
     getMeasuredValues(),
     getSetValues(),
+
   	 begin(int address, Stream &SerialDevice),
+
     setNewAddress(uint8_t newAddress),
+    zeroCurrent(),
+    clearAccountingData(),
+    setCacheTime(int);
+    
+	bool
     setOutput(bool output),
     setOverVoltageProtection(int voltage),
     setUnderVoltageProtection(int voltage),
@@ -190,14 +197,10 @@ class BatteryMonitor{
 	 setVoltageCalibration(float calibrationVoltage),
     setCurrentCalibration(float calibrationCurrent),
     setTemperatureCalibration(float calibrationTemperature),
-    //setPresetCapacity(int capacity,)
     setRelayType(int relayType),
     resetFactorySettings(),
     setCurrentMultiplier(int currentMultiplier),
-    setBatteryPercent(int batteryPercent),
-    zeroCurrent(),
-    clearAccountingData(),
-    setCacheTime(int);
+    setBatteryPercent(int batteryPercent);
 
   int 
     getUptime(),
@@ -223,26 +226,30 @@ class BatteryMonitor{
     getRemainingCapacity(),
     getCumulativeCapacity(),
 
-    getOVPVoltage(),
-    getUVPVoltage(),
-    getOCPForwardCurrent(),
-    getOCPReverseCurrent(),
-    getOPPPower();
+    getOverVoltageProtectionVoltage(),
+    getUnderVoltageProtectionVoltage(),
+    getOverCurrentProtectionForwardCurrent(),
+    getOverCurrentProtectionReverseCurrent(),
+    getOverPowerProtectionPower();
 
   private:
   String 
       getStringField(String message, int idx),
       readMessage();
   void
-
     sendMessage(int address, int command, int parameter),
     debug(const char msg[]),
     debug(char msg[]),
     debug(char c),
     debug(String &msg),
     debug(int i);
+  int
+  	 getSingleReturnValue_i();
+  float
+  	 getSingleReturnValue_f();
   bool
-  	 checkCache();
+  	 checkCache(),
+  	 sendCommand();
 
   Stream 			  *bm_serial;
   setValues_t       setValues;
