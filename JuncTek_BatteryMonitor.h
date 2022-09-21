@@ -11,7 +11,7 @@
 
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
-#define DEBUG
+//#define DEBUG
 
 /* Format:
  *  
@@ -170,7 +170,8 @@ class BatteryMonitor{
     setNewAddress(uint8_t newAddress),
     zeroCurrent(),
     clearAccountingData(),
-    setCacheTime(int);
+    setCacheTime(int),
+    resetFactorySettings();
     
 	bool
     setOutput(bool output),
@@ -193,12 +194,11 @@ class BatteryMonitor{
     setCurrentCalibration(int calibrationCurrent),
     setTemperatureCalibration(int calibrationTemperature),
 	 
-	 setBatteryCapacity(float capacity),
-	 setVoltageCalibration(float calibrationVoltage),
+    setBatteryCapacity(float capacity),
+    setVoltageCalibration(float calibrationVoltage),
     setCurrentCalibration(float calibrationCurrent),
     setTemperatureCalibration(float calibrationTemperature),
     setRelayType(int relayType),
-    resetFactorySettings(),
     setCurrentMultiplier(int currentMultiplier),
     setBatteryPercent(int batteryPercent);
 
@@ -210,7 +210,7 @@ class BatteryMonitor{
     getProtectionTemperature(),
     getProtectionRecoveryTime(),
     getProtectionDelayTime(),
-    getPresetCapacity(),
+    getCapacity(),
     getVoltageCalibration(),
     getCurrentCalibration(),
     getTemperatureCalibration(),
@@ -249,7 +249,7 @@ class BatteryMonitor{
   	 getSingleReturnValue_f();
   bool
   	 checkCache(),
-  	 sendCommand();
+  	 sendCommand(int address, int command, int parameter);
 
   Stream 			  *bm_serial;
   setValues_t       setValues;

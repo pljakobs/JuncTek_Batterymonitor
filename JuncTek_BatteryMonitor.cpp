@@ -109,15 +109,10 @@ bool BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
 bool BatteryMonitor::setRelayType(int relayType){
   return sendCommand(bm_address, BM_F_SetRelayType, relayType);
 }
-/*
-void BatteryMonitor::setPresetCapacity(int capacity){
-	int 
-}
-*/
-bool BatteryMonitor::resetFactorySettings(){
+
+void BatteryMonitor::resetFactorySettings(){
   sendMessage(bm_address, BM_F_ResumeFctSettings, 1);
-  delay(25);
-  getSetValues();
+  String message=readMessage();
 }
 bool BatteryMonitor::setCurrentMultiplier(int currentMultiplier){
   return sendCommand(bm_address, BM_F_SetCurrMult, currentMultiplier);
@@ -131,11 +126,11 @@ bool BatteryMonitor::setBatteryPercent(int batteryPercent){
 	}
 }
 void BatteryMonitor::zeroCurrent(){
-	sendMessage(bm_address, BM_F_ZeroCurrent, 1);
+	bool rc=sendCommand(bm_address, BM_F_ZeroCurrent, 1);
 }
 
 void BatteryMonitor::clearAccountingData(){
-	sendMessage(bm_address, BM_F_ClearAccData, 1);
+	  bool rc=sendCommand(bm_address, BM_F_ClearAccData, 1);
 }
 
 int BatteryMonitor::getUptime(){
@@ -153,39 +148,38 @@ int BatteryMonitor::getTemperature(){
 }
    
 int BatteryMonitor::getProtectionTemperature(){
-  int temp;
-  return temp;
+    return setValues.protectionTemperature;
 }
+
 int BatteryMonitor::getProtectionRecoveryTime(){
-  int time;
-  return time;
+    return setValues.protectionRecoveryTime;
 }
+
 int BatteryMonitor::getProtectionDelayTime(){
-  int time;
-  return time;
+    return setValues.protectionDelayTime;
 }
-int BatteryMonitor::getPresetCapacity(){
-  return setValues.presetCapacity/10;
+
+int BatteryMonitor::getCapacity(){
+    return setValues.presetCapacity/10;
 }
+
 int BatteryMonitor::getVoltageCalibration(){
-  int volt;
-  return volt;
+    return setValues.voltageCalibration;
 }
+
 int BatteryMonitor::getCurrentCalibration(){
-  int curr;
-  return curr;
+    return setValues.currentCalibration;
 }
+
 int BatteryMonitor::getTemperatureCalibration(){
-  int temp;
-  return temp;
+    return setValues.temperatureCalibration;
 }
-int BatteryMonitor::getVoltageScale(){
-  int scale;
-  return scale;
+
+int BatteryMonitor::getVoltageScale(){  
+    return setValues.voltageScale;
 }
 int BatteryMonitor::getCurrentScale(){
-  int scale;
-  return scale;
+    return setValues.currentScale;
 }
 
 int BatteryMonitor::getRelayType(){
@@ -369,25 +363,39 @@ void BatteryMonitor::getSetValues(){
 
 bool BatteryMonitor::sendCommand(int address, int command, int parameter){
 	String message;
-	int command_r, address_r, checksum_r, parameter_r; //values as read back
-	char verb;	
+	int command_r,returncode; //values as read back
+	char verb_r,verb;	
 	
 	sendMessage(bm_address, command, parameter);
 	message=readMessage();
-
-	verb			=	message.substr(2,3).toChar();
-	command_r	=	message.substr(3,5)toInt();
+  command_r = message.substring(3,5).toInt();
+  returncode = getStringField(message, 2).toInt();
+  getSetValues();
+  if(command_r == command && returncode==0){
+    return true;
+  }else{
+    return false;
+  }
+  /*
+   * 
+  //verb='w';
+	//&verb_r			=	message.substring(2,3).c_str();
+	command_r	=	message.substring(3,5).toInt();
 	address_r   =	getStringField(message, 1).toInt();
 	checksum_r  =	getStringField(message, 2).toInt();
 	parameter_r =	getStringField(message, 3).toInt();
 	#ifdef DEBUG
-	Serial.printf("==== verify command ====\n\t\t\tsent:\t|\t\treceived\n\tverb\t:\t%i\t|\t\t W\n\tcommand\t:%i\t|\t\t %i\n\taddress\t:%i\t|\t\t %i\n\tchecksum\t:\t%i\t|\t\t %i\n\tparameter\t:\t%i\t\|\t\t %i\n\n", verb,command,command_r,address,address_r,checksum(parameter),checksum_r,parameter,parameter_r);
+  Serial.println(message);
+	//Serial.printf("==== verify command ====\n\t\t\tsent:\t|\t\treceived\n\tverb\t:\t%i\t|\t\t W\n\tcommand\t:%i\t|\t\t %i\n\taddress\t:%i\t|\t\t %i\n\tchecksum\t:\t%i\t|\t\t %i\n\tparameter\t:\t%i\t\t|\t\t %i\n\n", verb,command,command_r,address,address_r,checksum(parameter),checksum_r,parameter,parameter_r);
+  Serial.printf("==== verify command ====\n\t\tsent:\t|\t\treceived\n\tcommand\t:%i\t|\t\t %i\n\taddress\t:%i\t|\t\t %i\n\tchecksum\t:\t%i\t|\t\t %i\n\tparameter\t:\t%i\t\t|\t\t %i\n\n", command,command_r,address,address_r,checksum(parameter),checksum_r,parameter,parameter_r);
 	#endif
-	if(verb=="w" && command_r==command && address_r==address && parameter_r==parameter && checksum(parameter)==checksum_r){
+	if(command_r==command && address_r==address && parameter_r==parameter && checksum(parameter)==checksum_r){
 		return true;
 	} else {
 		return false;
 	}
+ */
+  
 }
 
 String BatteryMonitor::getStringField(String message, int idx){
@@ -500,4 +508,3 @@ void BatteryMonitor::debug(int i){
     Serial.println(i);
     #endif
     }
-
