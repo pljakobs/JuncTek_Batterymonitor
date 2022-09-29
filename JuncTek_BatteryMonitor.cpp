@@ -21,8 +21,9 @@ void BatteryMonitor::begin(int address, Stream &serialDevice){
 }
 
 void BatteryMonitor::setNewAddress(uint8_t newAddress){
-    
+    sendCommand(bm_address, BM_F_SetAddress, newAddress);
 }
+
 bool BatteryMonitor::setOutput(bool output){
 	if(output){
    	return sendCommand(bm_address, BM_F_TurnOnOutput, 1);
