@@ -6,6 +6,7 @@ BatteryMonitor::BatteryMonitor(){
 BatteryMonitor::~BatteryMonitor(){
   
 }
+
 void BatteryMonitor::begin(int address, Stream &serialDevice){
   bm_serial=&serialDevice;
   bm_address=address;
@@ -183,6 +184,10 @@ int BatteryMonitor::getCurrentScale(){
     return setValues.currentScale;
 }
 
+int BatteryMonitor::getCurrentDirection(){
+    return measuredValues.curren;
+}
+
 int BatteryMonitor::getRelayType(){
 	return setValues.relayType;
 }
@@ -322,19 +327,19 @@ void BatteryMonitor::getSetValues(){
   		19: currentScale
   	*/
   	
-  	setValues.OVPVoltage					=	getStringField(message, 3).toFloat()/100;
-  	setValues.UVPVoltage					=	getStringField(message, 4).toFloat()/100;
-  	setValues.OCPForwardCurrent		=	getStringField(message, 5).toFloat()/100;
-  	setValues.OCPReverseCurrent		=	getStringField(message, 6).toFloat()/100;
-  	setValues.OPPPower					=	getStringField(message, 7).toFloat()/100;
-  	setValues.protectionTemperature	=	getStringField(message, 8).toInt()-100;
+  	setValues.OVPVoltage					    =	getStringField(message, 3).toFloat()/100;
+  	setValues.UVPVoltage					    =	getStringField(message, 4).toFloat()/100;
+  	setValues.OCPForwardCurrent		    =	getStringField(message, 5).toFloat()/100;
+  	setValues.OCPReverseCurrent		    =	getStringField(message, 6).toFloat()/100;
+  	setValues.OPPPower					      =	getStringField(message, 7).toFloat()/100;
+  	setValues.protectionTemperature	  =	getStringField(message, 8).toInt()-100;
   	setValues.protectionRecoveryTime	=	getStringField(message, 9).toInt();
-	setValues.protectionDelayTime		=	getStringField(message,10).toInt();
-	setValues.presetCapacity			=	getStringField(message,11).toInt();
+	  setValues.protectionDelayTime		  =	getStringField(message,10).toInt();
+	  setValues.presetCapacity			    =	getStringField(message,11).toInt();
   	
-  	setValues.voltageScale				=	getStringField(message,18).toInt();
-  	setValues.currentScale				=	getStringField(message,19).toInt();
-  	setValues.relayType					=	getStringField(message,16).toInt();
+  	setValues.voltageScale				    =	getStringField(message,18).toInt();
+  	setValues.currentScale				    =	getStringField(message,19).toInt();
+  	setValues.relayType					      =	getStringField(message,16).toInt();
   	/*
   	    int 
         deviceAddress,

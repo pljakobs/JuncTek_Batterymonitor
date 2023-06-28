@@ -9,6 +9,8 @@
 #include <HardwareSerial.h>
 #endif
 
+#include <Arduino.h>
+
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
 //#define DEBUG
@@ -137,6 +139,7 @@ typedef struct{
         temperatureCalibration,
         voltageScale,
         currentScale,
+        currentDirection,
         relayType;
 
     float        
