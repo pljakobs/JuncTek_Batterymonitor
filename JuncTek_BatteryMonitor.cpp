@@ -185,7 +185,7 @@ int BatteryMonitor::getCurrentScale(){
 }
 
 int BatteryMonitor::getCurrentDirection(){
-    return measuredValues.curren;
+    return measuredValues.currentDir;
 }
 
 int BatteryMonitor::getRelayType(){
