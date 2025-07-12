@@ -36,8 +36,20 @@
             if (end == std::string::npos) end = data.length();
             return String(data.substr(start, end - start));
         }
-        int toInt() const { return std::stoi(data); }
-        float toFloat() const { return std::stof(data); }
+        int toInt() const { 
+            try {
+                return std::stoi(data); 
+            } catch (const std::exception&) {
+                return 0; // Arduino behavior - return 0 for invalid strings
+            }
+        }
+        float toFloat() const { 
+            try {
+                return std::stof(data); 
+            } catch (const std::exception&) {
+                return 0.0f; // Arduino behavior - return 0.0 for invalid strings
+            }
+        }
         String& operator+=(const String& other) { data += other.data; return *this; }
         String& operator+=(char ch) { data += ch; return *this; }
         String& operator+=(const char* str) { data += str; return *this; }

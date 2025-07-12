@@ -73,7 +73,7 @@ jobs:
     - name: Run JuncTek protocol mock tests
       run: |
         cd protocol_test
-        pio test -e native -v
+        pio test -e native -vvv
         
     - name: Protocol test summary
       if: always()
