@@ -2,7 +2,7 @@ name: PlatformIO CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, copilot/fix-* ]
   pull_request:
     branches: [ main, develop ]
 
@@ -93,7 +93,17 @@ jobs:
         #include <Arduino.h>
         #include "JuncTek_BatteryMonitor.h"
         
+        // Include SoftwareSerial at global scope for non-ESP32 platforms
+        #if !defined(ESP32)
+        #include <SoftwareSerial.h>
+        #endif
+        
         BatteryMonitor monitor;
+        
+        // Declare SoftwareSerial at global scope for non-ESP32 platforms
+        #if !defined(ESP32)
+        SoftwareSerial batterySerial(2, 3); // RX, TX pins
+        #endif
         
         void setup() {
           Serial.begin(115200);
@@ -102,18 +112,11 @@ jobs:
           Serial.println("JuncTek Battery Monitor Test");
           
           // Initialize monitor with address 1
-          // For ESP32/ESP8266, use Serial2 if available, otherwise Serial1
           #if defined(ESP32)
             monitor.begin(1, Serial2);
-          #elif defined(ESP8266)
-            // ESP8266 typically uses SoftwareSerial for additional serial ports
-            #include <SoftwareSerial.h>
-            SoftwareSerial batterySerial(D2, D3); // RX, TX
-            monitor.begin(1, batterySerial);
           #else
-            // For Arduino boards, use SoftwareSerial
-            #include <SoftwareSerial.h>
-            SoftwareSerial batterySerial(2, 3); // RX, TX
+            // Use the globally declared SoftwareSerial for other boards
+            batterySerial.begin(9600);
             monitor.begin(1, batterySerial);
           #endif
           
