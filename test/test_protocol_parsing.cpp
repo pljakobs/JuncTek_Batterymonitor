@@ -53,7 +53,9 @@ void test_read_basic_info(void) {
     TEST_ASSERT_TRUE(true); // Placeholder for Arduino tests
 #endif
 }
-    
+
+// Test mock response generation
+void test_mock_response_generation(void) {
     String lastCmd = mockStream->getLastCommand();
     TEST_ASSERT_TRUE(lastCmd.length() == 0); // No command sent yet
     
@@ -174,7 +176,7 @@ void test_checksum_verification(void) {
 // Test write commands - over-voltage protection
 void test_write_ovp_setting(void) {
     // Test setting over-voltage protection to 14.4V
-    bool result = monitor->setOverVoltageProtection(14.4);
+    bool result = monitor->setOverVoltageProtection(14.4f);
     
     TEST_ASSERT_TRUE(result);
     
@@ -187,7 +189,7 @@ void test_write_ovp_setting(void) {
 // Test write commands - under-voltage protection
 void test_write_uvp_setting(void) {
     // Test setting under-voltage protection to 10.5V
-    bool result = monitor->setUnderVoltageProtection(10.5);
+    bool result = monitor->setUnderVoltageProtection(10.5f);
     
     TEST_ASSERT_TRUE(result);
     
@@ -200,7 +202,7 @@ void test_write_uvp_setting(void) {
 // Test write commands - battery capacity
 void test_write_battery_capacity(void) {
     // Test setting battery capacity to 100.0Ah
-    bool result = monitor->setBatteryCapacity(100.0);
+    bool result = monitor->setBatteryCapacity(100.0f);
     
     TEST_ASSERT_TRUE(result);
     
@@ -272,6 +274,7 @@ void setup() {
     UNITY_BEGIN();
     
     RUN_TEST(test_read_basic_info);
+    RUN_TEST(test_mock_response_generation);
     RUN_TEST(test_read_voltage);
     RUN_TEST(test_read_current);
     RUN_TEST(test_read_temperature);

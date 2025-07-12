@@ -19,6 +19,7 @@
         String(const std::string& str) : data(str) {}
         String(int value) : data(std::to_string(value)) {}
         String(uint8_t value) : data(std::to_string(value)) {}
+        String(uint32_t value) : data(std::to_string(value)) {}
         String(float value) : data(std::to_string(value)) {}
         
         size_t length() const { return data.length(); }
@@ -45,6 +46,11 @@
         const char* c_str() const { return data.c_str(); }
     };
     
+    // Free function for const char* + String
+    inline String operator+(const char* lhs, const String& rhs) {
+        return String(std::string(lhs) + std::string(rhs.c_str()));
+    }
+    
     // Mock Serial for native environment
     class MockSerial {
     public:
@@ -66,6 +72,17 @@
     inline void delay(unsigned long ms) {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
+    
+    // Native Stream base class
+    class Stream {
+    public:
+        virtual ~Stream() = default;
+        virtual int available() = 0;
+        virtual int read() = 0;
+        virtual int peek() = 0;
+        virtual size_t write(uint8_t data) = 0;
+        virtual size_t write(const uint8_t *buffer, size_t size) = 0;
+    };
     
 #else
     #include <Arduino.h>
