@@ -23,9 +23,9 @@
 // Create battery monitor instance
 BatteryMonitor monitor;
 
-// Create SoftwareSerial instance for non-ESP32 boards
+// Create SoftwareSerial instance for non-ESP32 boards at global scope
 #ifndef ESP32
-  SoftwareSerial batterySerial(2, 3); // RX, TX pins - adjust as needed
+SoftwareSerial batterySerial(2, 3); // RX, TX pins - adjust as needed
 #endif
 
 void setup() {
