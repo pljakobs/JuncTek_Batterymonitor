@@ -13,24 +13,7 @@ void debug(const char* msg) {
 }
 
 void debug(String msg) {
-#// Test write commands - battery capacity
-void test_write_battery_capacity(void) {
-    debug("[Battery capacity]: Testing battery capacity setting");
-    
-    // Test setting battery capacity to 100Ah
-    debug("[Battery capacity]: Setting battery capacity to 100.0Ah");
-    bool result = monitor->setBatteryCapacity(100.0f);
-    
-    debug("[Battery capacity]: Library returned: " + String(result ? "SUCCESS" : "FAILED"));
-    TEST_ASSERT_TRUE(result);
-    
-    // Verify correct command was sent
-    String lastCmd = mockStream->getLastCommand();
-    debug("[Battery capacity]: Last command sent: " + lastCmd);
-    TEST_ASSERT_TRUE(lastCmd.indexOf("W20") >= 0); // W20 is capacity command
-    TEST_ASSERT_TRUE(lastCmd.indexOf("10000") >= 0); // 100Ah = 10000 in protocol
-    debug("[Battery capacity]: Command validation passed - W20 with 10000 detected");
-}_BUILD
+#ifdef NATIVE_BUILD
     printf("[DEBUG] %s\n", msg.c_str());
 #endif
 }
