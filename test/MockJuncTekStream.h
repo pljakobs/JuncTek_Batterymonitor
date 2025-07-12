@@ -181,7 +181,7 @@ private:
     String generateR00Response(uint8_t address);
     String generateR50Response(uint8_t address);
     String generateR51Response(uint8_t address);
-    bool processWriteCommand(const String& cmd);
+    bool processWriteCommand(const String& cmd, int functionNum, uint8_t address);
     
 public:
     MockJuncTekStream(bool debug = false);

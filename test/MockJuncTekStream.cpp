@@ -106,30 +106,16 @@ String MockJuncTekStream::parseCommand(const String& cmd) {
     
     char operation = cmd.charAt(1); // W or R
     
-    // Extract function number
-    int funcStart = 2;
-    int funcEnd = cmd.indexOf('=');
-    if (funcEnd == -1) return "";
-    
-    String funcStr = cmd.substring(funcStart, funcEnd);
+    // Extract function number (2 digits)
+    String funcStr = cmd.substring(2, 4);
     int functionNum = funcStr.toInt();
     
     // Extract address
-    int addrStart = funcEnd + 1;
+    int addrStart = cmd.indexOf('=') + 1;
     int addrEnd = cmd.indexOf(',', addrStart);
     if (addrEnd == -1) return "";
     
     uint8_t address = cmd.substring(addrStart, addrEnd).toInt();
-    
-    // Extract checksum
-    int checksumStart = addrEnd + 1;
-    int checksumEnd = cmd.indexOf(',', checksumStart);
-    if (checksumEnd == -1) checksumEnd = cmd.length();
-    
-    uint8_t receivedChecksum = cmd.substring(checksumStart, checksumEnd).toInt();
-    
-    // Verify checksum (optional - can be disabled for testing)
-    // For now, let's assume checksum is correct
     
     if (operation == 'R' || operation == 'r') {
         // Read command
@@ -144,11 +130,11 @@ String MockJuncTekStream::parseCommand(const String& cmd) {
                 return ""; // Unknown function
         }
     } else if (operation == 'W' || operation == 'w') {
-        // Write command
-        if (processWriteCommand(cmd)) {
+        // Write command - process and return acknowledgment
+        if (processWriteCommand(cmd, functionNum, address)) {
             // Return acknowledgment for successful write
-            uint8_t checksum = calculateChecksum(":w" + String(functionNum) + "=" + String(address));
-            return ":w" + String(functionNum) + "=" + String(address) + "," + String(checksum) + ",OK,\r\n";
+            uint8_t checksum = calculateChecksum(":w" + String(functionNum, 10));
+            return ":w" + String(functionNum, 10) + "=" + String(address) + "," + String(checksum) + ",OK,\r\n";
         }
     }
     
@@ -156,48 +142,75 @@ String MockJuncTekStream::parseCommand(const String& cmd) {
 }
 
 String MockJuncTekStream::generateR00Response(uint8_t address) {
-    // Format: :r00=address,checksum,hallSensor,voltageRange,currentRange,version,serial,
-    String response = ":r00=" + String(address) + ",";
-    String data = String(state.hallSensor) + "," + 
-                  String(state.voltage_range) + "," + 
-                  String(state.current_range) + "," + 
-                  String(state.version) + "," + 
-                  String(state.serial) + ",";
+    // R00 Response format from PROTOCOL.md:
+    // :r00=address,checksum,sensor_voltage_current,version,serial,
+    // Example: :r00=1,47,1120,100,101,
+    // Where 1120 = 1(Hall sensor) + 1(100V) + 20(200A)
     
-    uint8_t checksum = calculateChecksum(":r00=" + String(address));
-    response += String(checksum) + "," + data + "\r\n";
+    String sensorInfo = String(state.sensorType) + String(state.maxVoltage/100) + String(state.maxCurrent/10, 10);
+    String data = sensorInfo + "," + String(state.version) + "," + String(state.serial) + ",";
+    
+    uint8_t checksum = calculateChecksum(":r00=" + String(address) + "," + data);
+    String response = ":r00=" + String(address) + "," + String(checksum) + "," + data + "\r\n";
     
     return response;
 }
 
 String MockJuncTekStream::generateR50Response(uint8_t address) {
-    // Format: :r50=address,checksum,voltage,current,remaining_cap,cumulative_cap,watt_hour,
-    //         runtime,temperature,reserved1,output_status,current_direction,battery_life,internal_resistance,
-    String response = ":r50=" + String(address) + ",";
-    String data = String(state.voltage) + "," + 
-                  String(state.current) + "," + 
-                  String(state.remaining_capacity) + "," + 
-                  String(state.cumulative_capacity) + "," + 
-                  String(state.watt_hour) + "," + 
-                  String(state.runtime) + "," + 
-                  String(state.temperature) + "," + 
-                  String(state.reserved1) + "," + 
-                  String(state.output_status) + "," + 
-                  String(state.current_direction) + "," + 
-                  String(state.battery_life) + "," + 
-                  String(state.internal_resistance) + ",";
+    // R50 Response format from PROTOCOL.md (live measured values):
+    // :r50=address,checksum,voltage,current,remaining_cap,cumulative_cap,energy,
+    //      runtime,temperature,reserved,output_status,current_direction,battery_life,internal_resistance,
+    // Example: :r50=2,215,2056,200,5408,4592,9437,14353,134,0,0,0,162,30682,
     
-    uint8_t checksum = calculateChecksum(":r50=" + String(address));
-    response += String(checksum) + "," + data + "\r\n";
+    String data = String(state.voltage) + "," +           // voltage (×100)
+                  String(state.current) + "," +           // current (×100) 
+                  String(state.remainingCapacity) + "," + // remaining capacity (×1000)
+                  String(state.cumulativeCapacity) + "," +// cumulative capacity (×1000)
+                  String(state.energy) + "," +            // energy (×100000)
+                  String(state.runtime) + "," +           // runtime in seconds
+                  String(state.temperature + 100) + "," + // temperature (+100)
+                  "0," +                                   // reserved
+                  String(state.outputStatus) + "," +      // output status
+                  String(state.currentDirection) + "," +  // current direction
+                  String(state.batteryLife) + "," +       // battery life in minutes
+                  String(state.internalResistance) + ","; // internal resistance (×100)
+    
+    uint8_t checksum = calculateChecksum(":r50=" + String(address) + "," + data);
+    String response = ":r50=" + String(address) + "," + String(checksum) + "," + data + "\r\n";
     
     return response;
 }
 
 String MockJuncTekStream::generateR51Response(uint8_t address) {
-    // Format: :r51=address,checksum,ovp,uvp,ocp_forward,ocp_reverse,opp,otp,recovery_time,
-    //         delay_time,battery_capacity,voltage_cal,current_cal,temp_cal,reserved2,relay_type,
-    //         current_multiple,voltage_scale,current_scale,
-    String response = ":r51=" + String(address) + ",";
+    // R51 Response format from PROTOCOL.md (configuration settings):
+    // :r51=address,checksum,ovp,uvp,ocp_forward,ocp_reverse,opp,otp,recovery_time,
+    //      delay_time,battery_capacity,voltage_cal,current_cal,temp_cal,reserved,relay_type,
+    //      current_multiple,voltage_scale,current_scale,
+    // Example: :r51=1,211,3000,100,2000,2000,10000,151,10,7,200,120,90,101,0,0,2,12,13,
+    
+    String data = String(state.ovpVoltage) + "," +       // OVP voltage (×100)
+                  String(state.uvpVoltage) + "," +       // UVP voltage (×100)
+                  String(state.ocpForward) + "," +       // Forward OCP (×100)
+                  String(state.ocpReverse) + "," +       // Reverse OCP (×100)
+                  String(state.oppPower) + "," +         // OPP power (×100)
+                  String(state.otpTemperature + 100) + ","+ // OTP temperature (+100)
+                  String(state.recoveryTime) + "," +     // Recovery time
+                  String(state.delayTime) + "," +        // Delay time
+                  String(state.batteryCapacity) + "," +  // Battery capacity (×10)
+                  String(state.voltageCalibration) + "," + // Voltage calibration
+                  String(state.currentCalibration) + "," + // Current calibration
+                  String(state.temperatureCalibration + 100) + "," + // Temp calibration (+100)
+                  "0," +                                  // Reserved
+                  String(state.relayType) + "," +        // Relay type
+                  String(state.currentMultiple) + "," +  // Current multiple
+                  String(state.voltageScale) + "," +     // Voltage scale
+                  String(state.currentScale) + ",";      // Current scale
+    
+    uint8_t checksum = calculateChecksum(":r51=" + String(address) + "," + data);
+    String response = ":r51=" + String(address) + "," + String(checksum) + "," + data + "\r\n";
+    
+    return response;
+}
     String data = String(state.ovp_voltage) + "," + 
                   String(state.uvp_voltage) + "," + 
                   String(state.ocp_forward) + "," + 
@@ -222,9 +235,25 @@ String MockJuncTekStream::generateR51Response(uint8_t address) {
     return response;
 }
 
-bool MockJuncTekStream::processWriteCommand(const String& cmd) {
-    // Parse write command and update state
-    // For now, return true (successful write)
-    // TODO: Implement actual parameter parsing and state updates
-    return true;
+bool MockJuncTekStream::processWriteCommand(const String& cmd, int functionNum, uint8_t address) {
+    // Parse write command and update state based on function number
+    // Extract data field from command
+    int dataStart = cmd.lastIndexOf(',') + 1;
+    int dataEnd = cmd.indexOf('\r', dataStart);
+    if (dataEnd == -1) dataEnd = cmd.indexOf('\n', dataStart);
+    if (dataEnd == -1) dataEnd = cmd.length();
+    
+    String dataField = cmd.substring(dataStart, dataEnd);
+    
+    // Process different write functions
+    switch (functionNum) {
+        case 50: // W50 - write protection settings
+            // For testing, we'll accept any write to protection settings
+            return true;
+        case 51: // W51 - write system configuration  
+            // For testing, we'll accept any write to system config
+            return true;
+        default:
+            return false; // Unknown write function
+    }
 }
