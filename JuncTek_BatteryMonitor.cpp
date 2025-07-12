@@ -495,7 +495,6 @@ String BatteryMonitor::readMessage(){
         #ifdef NATIVE_BUILD
         printf("[LibRead: int=%d char='%c'] ", readValue, c);
         #endif
-        debug(c);
         _message=_message+String(c);
         //Serial.print(c);
         if (c=='\r') {
