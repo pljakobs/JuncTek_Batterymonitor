@@ -85,11 +85,12 @@
     
     // Add missing Arduino functions for native builds
     inline unsigned long millis() {
+        static auto start = std::chrono::steady_clock::now();
         auto now = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now );
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
         return duration.count();
     }
-    
+
     inline void delay(unsigned long ms) {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
@@ -149,7 +150,7 @@ private:
         // Measured values (R50)
         uint16_t voltage = 2056;      // 20.56V (value * 0.01)
         int16_t current = 200;        // 2.00A (value * 0.01)
-        uint16_t remaining_capacity = 5408;  // 5.408Ah (value * 0.001)
+        uint16_t remaining_capacity = 54080;  // 54.08Ah (value * 0.001)
         uint16_t cumulative_capacity = 4592; // 4.592Ah (value * 0.001)
         uint16_t watt_hour = 9437;    // 0.09437kWh (value * 0.00001)
         uint32_t runtime = 14353;     // 14353 seconds
