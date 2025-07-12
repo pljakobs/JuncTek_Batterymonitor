@@ -2,6 +2,7 @@
 
 BatteryMonitor::BatteryMonitor(){
 //empty constructor
+  cacheState = invalid;
 }
 BatteryMonitor::~BatteryMonitor(){
   
@@ -14,6 +15,7 @@ void BatteryMonitor::begin(int address, Stream &serialDevice){
   basicInfo.deviceAddress=bm_address;
   measuredValues.deviceAddress=bm_address;
   cacheTime=CACHE_TIME; 
+  cacheState = invalid;
   getBasicInfo();
   
   //Serial.printf("=== Battery Monitor basic info ===\nmax Voltage: %i\nmax Current: %i\nSensor Type: %i\nVersion    : %i\nSerial Nr : %i",  basicInfo.maxVoltage, basicInfo.maxCurrent,basicInfo.sensorType,basicInfo.deviceVersion,basicInfo.deviceSerialNumber);
@@ -108,6 +110,19 @@ bool BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
   	return sendCommand(bm_address, BM_F_SetTempCalbr,t );
 }
 
+bool BatteryMonitor::setVoltageCalibration(float calibrationVoltage){
+	return sendCommand(bm_address, BM_F_SetVoltCalbr, (int)calibrationVoltage);
+}
+
+bool BatteryMonitor::setCurrentCalibration(float calibrationCurrent){
+	return sendCommand(bm_address, BM_F_SetCurrCalbr, (int)calibrationCurrent);
+}
+
+bool BatteryMonitor::setTemperatureCalibration(float calibrationTemperature){
+	int t=(int)calibrationTemperature+100;
+  	return sendCommand(bm_address, BM_F_SetTempCalbr,t );
+}
+
 bool BatteryMonitor::setRelayType(int relayType){
   return sendCommand(bm_address, BM_F_SetRelayType, relayType);
 }
@@ -128,11 +143,11 @@ bool BatteryMonitor::setBatteryPercent(int batteryPercent){
 	}
 }
 void BatteryMonitor::zeroCurrent(){
-	bool rc=sendCommand(bm_address, BM_F_ZeroCurrent, 1);
+	sendCommand(bm_address, BM_F_ZeroCurrent, 1);
 }
 
 void BatteryMonitor::clearAccountingData(){
-	  bool rc=sendCommand(bm_address, BM_F_ClearAccData, 1);
+	sendCommand(bm_address, BM_F_ClearAccData, 1);
 }
 
 int BatteryMonitor::getUptime(){
@@ -239,6 +254,13 @@ void BatteryMonitor::getBasicInfo(){
   sendMessage(bm_address, BM_F_ReadBasicInf, 1);
   message=readMessage();
 
+  // Verify checksum before processing data
+  if (!verifyChecksum(message)) {
+    debug("Basic info checksum verification failed");
+    cacheState = invalid;
+    return;
+  }
+
   debug("get sensor type, max voltage and max current");
   field=getStringField(message,3);
   debug("field:");
@@ -265,6 +287,13 @@ void BatteryMonitor::getMeasuredValues(){
 	  sendMessage(bm_address, BM_F_ReadMsrdVals, 1);
 	  message=readMessage();
 	
+	  // Verify checksum before processing data
+	  if (!verifyChecksum(message)) {
+	    debug("Measured values checksum verification failed");
+	    cacheState = invalid;
+	    return;
+	  }
+
 	  /*
 	  * :r50=<addr>,
 	  * 01 - <addr>
@@ -299,12 +328,21 @@ void BatteryMonitor::getMeasuredValues(){
 	  measuredValues.outputState=getStringField(message,11).toInt();
 	  measuredValues.currentDir=getStringField(message,12).toInt();
 	  measuredValues.lastReadTime=millis();
+	  cacheState = valid; // Mark data as valid after successful read
 	}
 }
 void BatteryMonitor::getSetValues(){
 	String message;	
 	sendMessage(bm_address, BM_F_ReadSetVals,1);
   	message=readMessage();
+
+  	// Verify checksum before processing data
+  	if (!verifyChecksum(message)) {
+    	debug("Set values checksum verification failed");
+    	// Don't update cacheState here as this function doesn't use the cache mechanism
+    	return;
+  	}
+
   	/*
   		 1: deviceAddress
   		 2: checksum
@@ -370,7 +408,6 @@ void BatteryMonitor::getSetValues(){
 bool BatteryMonitor::sendCommand(int address, int command, int parameter){
 	String message;
 	int command_r,returncode; //values as read back
-	char verb_r,verb;	
 	
 	sendMessage(bm_address, command, parameter);
 	message=readMessage();
@@ -445,7 +482,7 @@ void BatteryMonitor::sendMessage(int address, int command, int parameter){
 
 String BatteryMonitor::readMessage(){   
     String _message;
-    msgState_t _msgState;
+    msgState_t _msgState = reading; // Initialize to reading state
     char c;
     debug("readMessage");
     if (_msgState==crlf){
@@ -485,7 +522,50 @@ int BatteryMonitor::getCacheTime(){
 }
 
 bool BatteryMonitor::checkCache(){
-	return(millis()-measuredValues.lastReadTime<cacheTime);
+	if(millis()-measuredValues.lastReadTime < (unsigned long)cacheTime){
+		return true;
+	} else {
+		// Cache has expired, mark as stale
+		if(cacheState == valid) {
+			cacheState = stale;
+		}
+		return false;
+	}
+}
+
+bool BatteryMonitor::verifyChecksum(String message){
+  // Extract the checksum from field 2 of the message
+  int receivedChecksum = getStringField(message, 2).toInt();
+  
+  // Calculate checksum from all data fields (everything after the checksum field)
+  // The message format is: :r##=<addr>,<checksum>,<data1>,<data2>,...
+  int calculatedChecksum = 0;
+  int fieldCount = 3; // Start from field 3 (first data field after checksum)
+  String field;
+  
+  // Sum all data fields
+  do {
+    field = getStringField(message, fieldCount);
+    if (field.length() > 0) {
+      calculatedChecksum += field.toInt();
+      fieldCount++;
+    }
+  } while (field.length() > 0);
+  
+  // Apply the same checksum algorithm as used in sending
+  calculatedChecksum = checksum(calculatedChecksum);
+  
+  debug("Checksum verification:");
+  debug("Received: ");
+  debug(receivedChecksum);
+  debug("Calculated: ");
+  debug(calculatedChecksum);
+  
+  return (receivedChecksum == calculatedChecksum);
+}
+
+cacheState_t BatteryMonitor::getCacheState(){
+	return cacheState;
 }
 
 void BatteryMonitor::debug(const char msg[]){

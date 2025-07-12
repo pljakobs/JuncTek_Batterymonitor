@@ -71,6 +71,12 @@ typedef enum {
         crlf
 }msgState_t;
 
+typedef enum {
+        valid,      // Data is valid and fresh
+        stale,      // Data is valid but cache time has elapsed
+        invalid     // Data is invalid due to checksum failure or no data
+}cacheState_t;
+
 typedef  struct{
     int 
         deviceAddress,
@@ -219,8 +225,12 @@ class BatteryMonitor{
     getTemperatureCalibration(),
     getVoltageScale(),
     getCurrentScale(),
+    getCurrentDirection(),
     getCacheTime(),
     getRelayType();
+
+  cacheState_t
+    getCacheState();
 
   float
     getVoltage(),
@@ -252,13 +262,15 @@ class BatteryMonitor{
   	 getSingleReturnValue_f();
   bool
   	 checkCache(),
-  	 sendCommand(int address, int command, int parameter);
+  	 sendCommand(int address, int command, int parameter),
+  	 verifyChecksum(String message);
 
   Stream 			  *bm_serial;
   setValues_t       setValues;
   measuredValues_t  measuredValues;
   basicInfo_t       basicInfo;
   int               bm_address, cacheTime;
+  cacheState_t      cacheState;
   //Stream            &bm_serial;
 };
 
