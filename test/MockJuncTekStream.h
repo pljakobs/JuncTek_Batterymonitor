@@ -85,9 +85,8 @@
     
     // Add missing Arduino functions for native builds
     inline unsigned long millis() {
-        static auto start = std::chrono::steady_clock::now();
         auto now = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now );
         return duration.count();
     }
     

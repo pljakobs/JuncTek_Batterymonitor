@@ -445,12 +445,3 @@ int main() {
     return 0;
 }
 #endif
-
-#ifdef NATIVE_BUILD
-
-#include <chrono>
-unsigned long millis() {
-    auto now = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(no).count();
-}
-#endif
