@@ -295,3 +295,11 @@ void setup() {
 void loop() {
     // Empty
 }
+
+#ifdef NATIVE_BUILD
+// Native build - use main() function
+int main() {
+    setup();
+    return 0;
+}
+#endif
