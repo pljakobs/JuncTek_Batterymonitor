@@ -445,3 +445,7 @@ int main() {
     return 0;
 }
 #endif
+
+#ifdef NATIVE_BUILD
+unsigned long mockMillis = 0;
+#endif

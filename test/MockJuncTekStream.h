@@ -84,15 +84,11 @@
     extern MockSerial Serial;
     
     // Add missing Arduino functions for native builds
-    inline unsigned long millis() {
-        static auto start = std::chrono::steady_clock::now();
-        auto now = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
-        return duration.count();
-    }
+    extern unsigned long mockMillis;
+    inline unsigned long millis() { return mockMillis; }
 
     inline void delay(unsigned long ms) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+        mockMillis += ms;
     }
     
     // Native Stream base class
