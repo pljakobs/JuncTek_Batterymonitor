@@ -17,6 +17,7 @@
         String() = default;
         String(const char* str) : data(str) {}
         String(const std::string& str) : data(str) {}
+        String(char ch) : data(1, ch) {}  // Single character constructor
         String(int value) : data(std::to_string(value)) {}
         String(uint8_t value) : data(std::to_string(value)) {}
         String(uint32_t value) : data(std::to_string(value)) {}
