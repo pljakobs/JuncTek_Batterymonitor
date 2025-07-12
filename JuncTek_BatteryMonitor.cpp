@@ -300,19 +300,19 @@ void BatteryMonitor::getMeasuredValues(){
 	  measuredValues.currentDir=getStringField(message,12).toInt();
 	  measuredValues.lastReadTime=millis();
 
-    debug("[getMeasuredValues]:"+
-          "\n--------------------------------------------------------" +  
-          "\n| Uptime: " + String(measuredValues.uptime) +
-          "\n| Battery Life Left: " + String(measuredValues.batteryLifeLeft) +
-          "\n| Temperature: " + String(measuredValues.temperature) +
-          "\n| Voltage: " + String(measuredValues.voltage) +
-          "\n| Current: " + String(measuredValues.current) +
-          "\n| Internal Resistance: " + String(measuredValues.internalResistance) +
-          "\n| Remaining Capacity: " + String(measuredValues.remainingCapacity) +
-          "\n| Cumulative Capacity: " + String(measuredValues.cumulativeCapacity) +
-          "\n| Output State: " + String(measuredValues.outputState) +
-          "\n| Current Direction: " + String(measuredValues.currentDir) +
-          "\n--------------------------------------------------------");
+    debug("[getMeasuredValues]:");
+    debug("--------------------------------------------------------");
+    debug("| Uptime: " + String(measuredValues.uptime));
+    debug("| Battery Life Left: " + String(measuredValues.batteryLifeLeft));
+    debug("| Temperature: " + String(measuredValues.temperature));
+    debug("| Voltage: " + String(measuredValues.voltage));
+    debug("| Current: " + String(measuredValues.current));
+    debug("| Internal Resistance: " + String(measuredValues.internalResistance));
+    debug("| Remaining Capacity: " + String(measuredValues.remainingCapacity));
+    debug("| Cumulative Capacity: " + String(measuredValues.cumulativeCapacity));
+    debug("| Output State: " + String(measuredValues.outputState));
+    debug("| Current Direction: " + String(measuredValues.currentDir));
+    debug("--------------------------------------------------------");
 	}
 }
 void BatteryMonitor::getSetValues(){
@@ -379,25 +379,24 @@ void BatteryMonitor::getSetValues(){
         normallyOpen=0,
         normallyClosed=1
    */
-  debug("[getSetValues}" +
-      "\n--------------------------------------------------------" +  
-      "\n| OVP Voltage: " + String(setValues.OVPVoltage) +
-      "\n| UVP Voltage: " + String(setValues.UVPVoltage) +
-      "\n| OCP Forward Current: " + String(setValues.OCPForwardCurrent) +
-      "\n| OCP Reverse Current: " + String(setValues.OCPReverseCurrent) +
-      "\n| OPP Power: " + String(setValues.OPPPower) +
-      "\n| Protection Temperature: " + String(setValues.protectionTemperature) +
-      "\n| Protection Recovery Time: " + String(setValues.protectionRecoveryTime) +
-      "\n| Protection Delay Time: " + String(setValues.protectionDelayTime) +
-      "\n| Preset Capacity: " + String(setValues.presetCapacity) +
-      "\n| Voltage Calibration: " + String(setValues.voltageCalibration) +
-      "\n| Current Calibration: " + String(setValues.currentCalibration) +
-      "\n| Temperature Calibration: " + String(setValues.temperatureCalibration) +
-      "\n| Voltage Scale: " + String(setValues.voltageScale) +
-      "\n| Current Scale: " + String(setValues.currentScale) +
-      "\n| Relay Type: " + String(setValues.relayType) +
-      "\n--------------------------------------------------------\n"
-   );
+  debug("[getSetValues]");
+  debug("--------------------------------------------------------");
+  debug("| OVP Voltage: " + String(setValues.OVPVoltage));
+  debug("| UVP Voltage: " + String(setValues.UVPVoltage));
+  debug("| OCP Forward Current: " + String(setValues.OCPForwardCurrent));
+  debug("| OCP Reverse Current: " + String(setValues.OCPReverseCurrent));
+  debug("| OPP Power: " + String(setValues.OPPPower));
+  debug("| Protection Temperature: " + String(setValues.protectionTemperature));
+  debug("| Protection Recovery Time: " + String(setValues.protectionRecoveryTime));
+  debug("| Protection Delay Time: " + String(setValues.protectionDelayTime));
+  debug("| Preset Capacity: " + String(setValues.presetCapacity));
+  debug("| Voltage Calibration: " + String(setValues.voltageCalibration));
+  debug("| Current Calibration: " + String(setValues.currentCalibration));
+  debug("| Temperature Calibration: " + String(setValues.temperatureCalibration));
+  debug("| Voltage Scale: " + String(setValues.voltageScale));
+  debug("| Current Scale: " + String(setValues.currentScale));
+  debug("| Relay Type: " + String(setValues.relayType));
+  debug("--------------------------------------------------------");
 }
 
 bool BatteryMonitor::sendCommand(int address, int command, int parameter){
