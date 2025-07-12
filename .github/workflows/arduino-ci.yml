@@ -15,8 +15,10 @@ jobs:
         board:
           - fqbn: "arduino:avr:uno"
             platform: "arduino:avr"
+            index_url: ""
           - fqbn: "arduino:avr:mega"
-            platform: "arduino:avr" 
+            platform: "arduino:avr"
+            index_url: ""
           - fqbn: "esp32:esp32:esp32"
             platform: "esp32:esp32"
             index_url: "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
@@ -35,16 +37,16 @@ jobs:
       run: arduino-cli core update-index
       
     - name: Install additional package index
-      if: matrix.index_url
-      run: arduino-cli core update-index --additional-urls "${{ matrix.index_url }}"
+      if: ${{ matrix.board.index_url != '' }}
+      run: arduino-cli core update-index --additional-urls "${{ matrix.board.index_url }}"
       
-    - name: Install platform
-      run: |
-        if [ -n "${{ matrix.index_url }}" ]; then
-          arduino-cli core install ${{ matrix.platform }} --additional-urls "${{ matrix.index_url }}"
-        else
-          arduino-cli core install ${{ matrix.platform }}
-        fi
+    - name: Install platform with additional URL
+      if: ${{ matrix.board.index_url != '' }}
+      run: arduino-cli core install ${{ matrix.board.platform }} --additional-urls "${{ matrix.board.index_url }}"
+      
+    - name: Install platform (standard)
+      if: ${{ matrix.board.index_url == '' }}
+      run: arduino-cli core install ${{ matrix.board.platform }}
         
     - name: Create test sketch directory
       run: mkdir -p test_sketch
