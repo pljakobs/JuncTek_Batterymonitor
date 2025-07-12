@@ -1,4 +1,4 @@
-  #include "JuncTek_BatteryMonitor.h"
+#include "JuncTek_BatteryMonitor.h"
 
 BatteryMonitor::BatteryMonitor(){
 //empty constructor
@@ -192,7 +192,13 @@ int BatteryMonitor::getRelayType(){
 	return setValues.relayType;
 }
 float BatteryMonitor::getVoltage() {
+  #ifdef NATIVE_BUILD
+  printf("[getVoltage] Before getMeasuredValues: voltage=%f\n", measuredValues.voltage);
+  #endif
   getMeasuredValues();
+  #ifdef NATIVE_BUILD
+  printf("[getVoltage] After getMeasuredValues: voltage=%f\n", measuredValues.voltage);
+  #endif
   return measuredValues.voltage;
 }
 float BatteryMonitor::getCurrent(){
@@ -520,7 +526,12 @@ int BatteryMonitor::getCacheTime(){
 }
 
 bool BatteryMonitor::checkCache(){
-	return(millis()-measuredValues.lastReadTime<cacheTime);
+	bool cacheValid = (millis()-measuredValues.lastReadTime<cacheTime);
+	#ifdef NATIVE_BUILD
+	printf("[checkCache] lastReadTime=%lu, currentTime=%lu, cacheTime=%lu, valid=%s\n", 
+	       measuredValues.lastReadTime, millis(), cacheTime, cacheValid ? "true" : "false");
+	#endif
+	return cacheValid;
 }
 
 void BatteryMonitor::debug(const char msg[]){
