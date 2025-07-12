@@ -522,27 +522,47 @@ bool BatteryMonitor::checkCache(){
 
 void BatteryMonitor::debug(const char msg[]){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg);
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 
 void BatteryMonitor::debug(char msg[]){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg);
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 void BatteryMonitor::debug(char c){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%c", c);
+    #else
     Serial.print(c);
+    #endif
     #endif
     }
 void BatteryMonitor::debug(const String &msg){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg.c_str());
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 void BatteryMonitor::debug(int i){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%d\n", i);
+    #else
     Serial.println(i);
+    #endif
     #endif
     }
