@@ -34,6 +34,10 @@
             size_t pos = data.find(substr, start);
             return pos != std::string::npos ? pos : -1;
         }
+        int lastIndexOf(char ch) const { 
+            size_t pos = data.rfind(ch);
+            return pos != std::string::npos ? pos : -1;
+        }
         String substring(size_t start, size_t end = std::string::npos) const {
             if (start >= data.length()) return String(""); // Arduino behavior - return empty string
             if (end == std::string::npos) end = data.length();

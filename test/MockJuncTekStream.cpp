@@ -133,8 +133,8 @@ String MockJuncTekStream::parseCommand(const String& cmd) {
         // Write command - process and return acknowledgment
         if (processWriteCommand(cmd, functionNum, address)) {
             // Return acknowledgment for successful write
-            uint8_t checksum = calculateChecksum(":w" + String(functionNum, 10));
-            return ":w" + String(functionNum, 10) + "=" + String(address) + "," + String(checksum) + ",OK,\r\n";
+            uint8_t checksum = calculateChecksum(":w" + String(functionNum));
+            return ":w" + String(functionNum) + "=" + String(address) + "," + String(checksum) + ",OK,\r\n";
         }
     }
     
@@ -147,7 +147,7 @@ String MockJuncTekStream::generateR00Response(uint8_t address) {
     // Example: :r00=1,47,1120,100,101,
     // Where 1120 = 1(Hall sensor) + 1(100V) + 20(200A)
     
-    String sensorInfo = String(state.sensorType) + String(state.maxVoltage/100) + String(state.maxCurrent/10, 10);
+    String sensorInfo = String(state.hallSensor) + String(state.voltage_range/100) + String(state.current_range);
     String data = sensorInfo + "," + String(state.version) + "," + String(state.serial) + ",";
     
     uint8_t checksum = calculateChecksum(":r00=" + String(address) + "," + data);
@@ -164,16 +164,16 @@ String MockJuncTekStream::generateR50Response(uint8_t address) {
     
     String data = String(state.voltage) + "," +           // voltage (×100)
                   String(state.current) + "," +           // current (×100) 
-                  String(state.remainingCapacity) + "," + // remaining capacity (×1000)
-                  String(state.cumulativeCapacity) + "," +// cumulative capacity (×1000)
-                  String(state.energy) + "," +            // energy (×100000)
+                  String(state.remaining_capacity) + "," + // remaining capacity (×1000)
+                  String(state.cumulative_capacity) + "," +// cumulative capacity (×1000)
+                  String(state.watt_hour) + "," +         // energy (×100000)
                   String(state.runtime) + "," +           // runtime in seconds
-                  String(state.temperature + 100) + "," + // temperature (+100)
+                  String(state.temperature) + "," +       // temperature (+100)
                   "0," +                                   // reserved
-                  String(state.outputStatus) + "," +      // output status
-                  String(state.currentDirection) + "," +  // current direction
-                  String(state.batteryLife) + "," +       // battery life in minutes
-                  String(state.internalResistance) + ","; // internal resistance (×100)
+                  String(state.output_status) + "," +     // output status
+                  String(state.current_direction) + "," + // current direction
+                  String(state.battery_life) + "," +      // battery life in minutes
+                  String(state.internal_resistance) + ","; // internal resistance (×100)
     
     uint8_t checksum = calculateChecksum(":r50=" + String(address) + "," + data);
     String response = ":r50=" + String(address) + "," + String(checksum) + "," + data + "\r\n";
@@ -188,49 +188,26 @@ String MockJuncTekStream::generateR51Response(uint8_t address) {
     //      current_multiple,voltage_scale,current_scale,
     // Example: :r51=1,211,3000,100,2000,2000,10000,151,10,7,200,120,90,101,0,0,2,12,13,
     
-    String data = String(state.ovpVoltage) + "," +       // OVP voltage (×100)
-                  String(state.uvpVoltage) + "," +       // UVP voltage (×100)
-                  String(state.ocpForward) + "," +       // Forward OCP (×100)
-                  String(state.ocpReverse) + "," +       // Reverse OCP (×100)
-                  String(state.oppPower) + "," +         // OPP power (×100)
-                  String(state.otpTemperature + 100) + ","+ // OTP temperature (+100)
-                  String(state.recoveryTime) + "," +     // Recovery time
-                  String(state.delayTime) + "," +        // Delay time
-                  String(state.batteryCapacity) + "," +  // Battery capacity (×10)
-                  String(state.voltageCalibration) + "," + // Voltage calibration
-                  String(state.currentCalibration) + "," + // Current calibration
-                  String(state.temperatureCalibration + 100) + "," + // Temp calibration (+100)
-                  "0," +                                  // Reserved
-                  String(state.relayType) + "," +        // Relay type
-                  String(state.currentMultiple) + "," +  // Current multiple
-                  String(state.voltageScale) + "," +     // Voltage scale
-                  String(state.currentScale) + ",";      // Current scale
+    String data = String(state.ovp_voltage) + "," +       // OVP voltage (×100)
+                  String(state.uvp_voltage) + "," +       // UVP voltage (×100)
+                  String(state.ocp_forward) + "," +       // Forward OCP (×100)
+                  String(state.ocp_reverse) + "," +       // Reverse OCP (×100)
+                  String(state.opp_power) + "," +         // OPP power (×100)
+                  String(state.otp_temp) + "," +          // OTP temperature (+100)
+                  String(state.recovery_time) + "," +     // Recovery time
+                  String(state.delay_time) + "," +        // Delay time
+                  String(state.battery_capacity) + "," +  // Battery capacity (×10)
+                  String(state.voltage_cal) + "," +       // Voltage calibration
+                  String(state.current_cal) + "," +       // Current calibration
+                  String(state.temp_cal) + "," +          // Temp calibration (+100)
+                  String(state.reserved2) + "," +         // Reserved
+                  String(state.relay_type) + "," +        // Relay type
+                  String(state.current_multiple) + "," +  // Current multiple
+                  String(state.voltage_scale) + "," +     // Voltage scale
+                  String(state.current_scale) + ",";      // Current scale
     
     uint8_t checksum = calculateChecksum(":r51=" + String(address) + "," + data);
     String response = ":r51=" + String(address) + "," + String(checksum) + "," + data + "\r\n";
-    
-    return response;
-}
-    String data = String(state.ovp_voltage) + "," + 
-                  String(state.uvp_voltage) + "," + 
-                  String(state.ocp_forward) + "," + 
-                  String(state.ocp_reverse) + "," + 
-                  String(state.opp_power) + "," + 
-                  String(state.otp_temp) + "," + 
-                  String(state.recovery_time) + "," + 
-                  String(state.delay_time) + "," + 
-                  String(state.battery_capacity) + "," + 
-                  String(state.voltage_cal) + "," + 
-                  String(state.current_cal) + "," + 
-                  String(state.temp_cal) + "," + 
-                  String(state.reserved2) + "," + 
-                  String(state.relay_type) + "," + 
-                  String(state.current_multiple) + "," + 
-                  String(state.voltage_scale) + "," + 
-                  String(state.current_scale) + ",";
-    
-    uint8_t checksum = calculateChecksum(":r51=" + String(address));
-    response += String(checksum) + "," + data + "\r\n";
     
     return response;
 }
