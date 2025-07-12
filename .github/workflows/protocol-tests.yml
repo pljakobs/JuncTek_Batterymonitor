@@ -40,7 +40,10 @@ jobs:
         
     - name: Copy only required files for protocol testing
       run: |
-        # Copy mock framework (protocol testing only)
+        # Copy main library files (the code we want to test)
+        cp JuncTek_BatteryMonitor.h protocol_test/lib/JuncTek_BatteryMonitor/
+        cp JuncTek_BatteryMonitor.cpp protocol_test/lib/JuncTek_BatteryMonitor/
+        # Copy mock framework (protocol testing infrastructure)
         cp test/MockJuncTekStream.h protocol_test/lib/JuncTek_BatteryMonitor/
         cp test/MockJuncTekStream.cpp protocol_test/lib/JuncTek_BatteryMonitor/
         cp test/test_protocol_parsing.cpp protocol_test/test/

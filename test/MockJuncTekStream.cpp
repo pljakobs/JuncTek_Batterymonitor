@@ -1,5 +1,10 @@
 #include "MockJuncTekStream.h"
 
+#ifdef NATIVE_BUILD
+// Define the mock Serial object for native builds
+MockSerial Serial;
+#endif
+
 MockJuncTekStream::MockJuncTekStream(bool debug) : readIndex(0), debugMode(debug) {
 }
 

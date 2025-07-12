@@ -1,4 +1,52 @@
-#ifndef MOCK_JUNCTEK_STREAM_H
+#ifndef MOCKJUNCTEKSTREAM_H
+#define MOCKJUNCTEKSTREAM_H
+
+#ifdef NATIVE_BUILD
+    #include <iostream>
+    #include <string>
+    #include <cstdint>
+    #include <cstring>
+    
+    // Native environment compatibility layer
+    class String {
+    private:
+        std::string data;
+    public:
+        String() = default;
+        String(const char* str) : data(str) {}
+        String(const std::string& str) : data(str) {}
+        String(int value) : data(std::to_string(value)) {}
+        String(uint8_t value) : data(std::to_string(value)) {}
+        String(float value) : data(std::to_string(value)) {}
+        
+        size_t length() const { return data.length(); }
+        char charAt(size_t index) const { return index < data.length() ? data[index] : 0; }
+        int indexOf(char ch, size_t start = 0) const { 
+            size_t pos = data.find(ch, start);
+            return pos != std::string::npos ? pos : -1;
+        }
+        String substring(size_t start, size_t end = std::string::npos) const {
+            if (end == std::string::npos) end = data.length();
+            return String(data.substr(start, end - start));
+        }
+        int toInt() const { return std::stoi(data); }
+        String& operator+=(const String& other) { data += other.data; return *this; }
+        String& operator+=(char ch) { data += ch; return *this; }
+        String operator+(const String& other) const { return String(data + other.data); }
+        const char* c_str() const { return data.c_str(); }
+    };
+    
+    // Mock Serial for native environment
+    class MockSerial {
+    public:
+        void print(const String& str) { std::cout << str.c_str(); }
+        void println(const String& str) { std::cout << str.c_str() << std::endl; }
+    };
+    extern MockSerial Serial;
+    
+#else
+    #include <Arduino.h>
+#endifdef MOCK_JUNCTEK_STREAM_H
 #define MOCK_JUNCTEK_STREAM_H
 
 #include <Arduino.h>

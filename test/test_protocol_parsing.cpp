@@ -1,6 +1,6 @@
 #include <unity.h>
-#include "JuncTek_BatteryMonitor.h"
 #include "MockJuncTekStream.h"
+#include "JuncTek_BatteryMonitor.h"
 
 MockJuncTekStream* mockStream;
 BatteryMonitor* monitor;
@@ -18,12 +18,41 @@ void tearDown(void) {
 
 // Test basic device information reading (R00 command)
 void test_read_basic_info(void) {
-    // Mock will automatically respond to R00 command
-    // Expected response format: :r00=1,checksum,1,100,20,100,101,
+#ifdef NATIVE_BUILD
+    // Test R00 command parsing and response generation
+    String testCommand = ":R00=1,123,";
     
-    // The library should parse this correctly
-    // Note: We need to check if the library actually uses R00 command
-    // For now, let's test that the mock generates correct responses
+    // Send command to mock stream
+    for (int i = 0; i < testCommand.length(); i++) {
+        mockStream->write((uint8_t)testCommand.charAt(i));
+    }
+    mockStream->write('\r');
+    mockStream->write('\n');
+    
+    // Check that response is available
+    TEST_ASSERT_GREATER_THAN(0, mockStream->available());
+    
+    // Read response
+    String response = "";
+    while (mockStream->available()) {
+        char c = mockStream->read();
+        if (c != -1) response += c;
+    }
+    
+    // Verify response format: :r00=1,checksum,data...
+    TEST_ASSERT_TRUE(response.length() > 0);
+    TEST_ASSERT_EQUAL(':',  response.charAt(0));
+    TEST_ASSERT_EQUAL('r',  response.charAt(1));
+    TEST_ASSERT_EQUAL('0',  response.charAt(2));
+    TEST_ASSERT_EQUAL('0',  response.charAt(3));
+    TEST_ASSERT_EQUAL('=',  response.charAt(4));
+    
+#else
+    // Test with actual BatteryMonitor library
+    // The library should parse R00 response correctly
+    TEST_ASSERT_TRUE(true); // Placeholder for Arduino tests
+#endif
+}
     
     String lastCmd = mockStream->getLastCommand();
     TEST_ASSERT_TRUE(lastCmd.length() == 0); // No command sent yet

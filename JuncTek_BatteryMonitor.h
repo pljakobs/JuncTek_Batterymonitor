@@ -1,15 +1,21 @@
 #ifndef _BATTERYMONITORH_
 #define _BATTERYMONITORH_
 
-#ifndef Stream_h
-#include <Stream.h>
-#endif 
+#ifdef NATIVE_BUILD
+  // Native build compatibility - use our mock types
+  #include "MockJuncTekStream.h"  // This provides String, Stream, etc. for native
+#else
+  // Arduino build - use real Arduino types
+  #ifndef Stream_h
+  #include <Stream.h>
+  #endif 
 
-#ifndef HardwareSerial_h
-#include <HardwareSerial.h>
+  #ifndef HardwareSerial_h
+  #include <HardwareSerial.h>
+  #endif
+
+  #include <Arduino.h>
 #endif
-
-#include <Arduino.h>
 
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
