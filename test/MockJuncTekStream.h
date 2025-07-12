@@ -1,0 +1,102 @@
+#ifndef MOCK_JUNCTEK_STREAM_H
+#define MOCK_JUNCTEK_STREAM_H
+
+#include <Arduino.h>
+#include <Stream.h>
+
+/**
+ * Mock Stream implementation for testing JuncTek Battery Monitor protocol
+ * 
+ * Based on the official JuncTek KL-F protocol specification:
+ * Format: :W,R00~99=1-99,Checksum,Data field,<CR><LF>
+ * 
+ * This mock allows testing protocol parsing without actual hardware.
+ */
+class MockJuncTekStream : public Stream {
+private:
+    String responseBuffer;
+    int readIndex;
+    String lastCommand;
+    bool debugMode;
+    
+    // Mock device state
+    struct DeviceState {
+        // Basic info (R00)
+        uint8_t hallSensor = 1;      // 1=Hall sensor, 2=sampler
+        uint16_t voltage_range = 100; // 100V
+        uint16_t current_range = 20;  // 200A (20 = 200A)
+        uint16_t version = 100;       // 1.00
+        uint16_t serial = 101;        // Serial number
+        
+        // Measured values (R50)
+        uint16_t voltage = 2056;      // 20.56V (value * 0.01)
+        int16_t current = 200;        // 2.00A (value * 0.01)
+        uint16_t remaining_capacity = 5408;  // 5.408Ah (value * 0.001)
+        uint16_t cumulative_capacity = 4592; // 4.592Ah (value * 0.001)
+        uint16_t watt_hour = 9437;    // 0.09437kWh (value * 0.00001)
+        uint32_t runtime = 14353;     // 14353 seconds
+        uint8_t temperature = 134;    // 34°C (value - 100)
+        uint8_t reserved1 = 0;
+        uint8_t output_status = 0;    // 0=ON, 1=OVP, 2=OCP, 3=LVP, 4=NCP, 5=OPP, 6=OTP, 255=OFF
+        uint8_t current_direction = 0; // 0=forward, 1=reverse
+        uint16_t battery_life = 162;  // 162 minutes
+        uint16_t internal_resistance = 30682; // 306.82mΩ (value * 0.01)
+        
+        // Protection settings (R51)
+        uint16_t ovp_voltage = 3000;  // 30.00V (value * 0.01)
+        uint16_t uvp_voltage = 100;   // 1.00V (value * 0.01)
+        uint16_t ocp_forward = 2000;  // 20.00A (value * 0.01)
+        uint16_t ocp_reverse = 2000;  // -20.00A (value * 0.01)
+        uint16_t opp_power = 10000;   // 100.00W (value * 0.01)
+        uint8_t otp_temp = 151;       // 51°C (value - 100)
+        uint8_t recovery_time = 10;   // 10s
+        uint8_t delay_time = 7;       // 7s
+        uint16_t battery_capacity = 200; // 20.0Ah (value * 0.1)
+        uint8_t voltage_cal = 120;    // +20 fine-tuning (100 = no adjustment)
+        uint8_t current_cal = 90;     // -10 fine-tuning (100 = no adjustment)
+        uint8_t temp_cal = 101;       // +1°C (100 = no adjustment)
+        uint8_t reserved2 = 0;
+        uint8_t relay_type = 0;       // 0=normally open, 1=normally closed
+        uint8_t current_multiple = 2; // Current multiplier
+        uint8_t voltage_scale = 12;   // Voltage curve scale 12V/div
+        uint8_t current_scale = 13;   // Current curve scale 13A/div
+    } state;
+    
+    uint8_t calculateChecksum(const String& data);
+    String parseCommand(const String& cmd);
+    String generateR00Response(uint8_t address);
+    String generateR50Response(uint8_t address);
+    String generateR51Response(uint8_t address);
+    bool processWriteCommand(const String& cmd);
+    
+public:
+    MockJuncTekStream(bool debug = false);
+    
+    // Stream interface
+    int available() override;
+    int read() override;
+    int peek() override;
+    size_t write(uint8_t data) override;
+    size_t write(const uint8_t *buffer, size_t size) override;
+    
+    // Mock control methods
+    void injectResponse(const String& response);
+    void clearBuffer();
+    String getLastCommand() const { return lastCommand; }
+    void setDebugMode(bool enabled) { debugMode = enabled; }
+    
+    // Device state manipulation for testing
+    void setVoltage(float volts) { state.voltage = (uint16_t)(volts * 100); }
+    void setCurrent(float amps) { state.current = (int16_t)(amps * 100); }
+    void setTemperature(int celsius) { state.temperature = celsius + 100; }
+    void setRemainingCapacity(float ah) { state.remaining_capacity = (uint16_t)(ah * 1000); }
+    void setOutputStatus(uint8_t status) { state.output_status = status; }
+    void setCurrentDirection(uint8_t direction) { state.current_direction = direction; }
+    
+    // Simulate protocol errors for testing
+    void simulateChecksumError(bool enable);
+    void simulateTimeout(bool enable);
+    void simulateGarbledData(bool enable);
+};
+
+#endif // MOCK_JUNCTEK_STREAM_H
