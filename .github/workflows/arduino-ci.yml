@@ -48,46 +48,6 @@ jobs:
       if: ${{ matrix.board.index_url == '' }}
       run: arduino-cli core install ${{ matrix.board.platform }}
         
-    - name: Create test sketch directory
-      run: mkdir -p test_sketch
-      
-    - name: Create basic test sketch
-      run: |
-        cat > test_sketch/test_sketch.ino << 'EOF'
-        #include "JuncTek_BatteryMonitor.h"
-        
-        BatteryMonitor monitor;
-        
-        void setup() {
-          Serial.begin(9600);
-          // Initialize with address 1 and Serial1 (for boards that have it)
-          #if defined(HAVE_HWSERIAL1)
-            monitor.begin(1, Serial1);
-          #else
-            // For boards without Serial1, use SoftwareSerial
-            #include <SoftwareSerial.h>
-            SoftwareSerial softSerial(2, 3); // RX, TX pins
-            monitor.begin(1, softSerial);
-          #endif
-        }
-        
-        void loop() {
-          // Test basic functionality
-          float voltage = monitor.getVoltage();
-          float current = monitor.getCurrent();
-          int temperature = monitor.getTemperature();
-          
-          Serial.print("Voltage: ");
-          Serial.println(voltage);
-          Serial.print("Current: ");
-          Serial.println(current);
-          Serial.print("Temperature: ");
-          Serial.println(temperature);
-          
-          delay(1000);
-        }
-        EOF
-        
     - name: Create symbolic link to library
       run: |
         mkdir -p ~/Arduino/libraries/JuncTek_BatteryMonitor
@@ -95,54 +55,21 @@ jobs:
         ln -s $PWD/JuncTek_BatteryMonitor.cpp ~/Arduino/libraries/JuncTek_BatteryMonitor/
         ln -s $PWD/library.properties ~/Arduino/libraries/JuncTek_BatteryMonitor/
         
-    - name: Compile test sketch
-      run: arduino-cli compile --fqbn ${{ matrix.board.fqbn }} test_sketch
-      
-    - name: Create advanced test sketch
+    - name: List available examples
       run: |
-        cat > test_sketch_advanced/test_sketch_advanced.ino << 'EOF'
-        #include "JuncTek_BatteryMonitor.h"
+        echo "Available examples:"
+        find examples -name "*.ino" -type f
         
-        BatteryMonitor monitor;
-        
-        void setup() {
-          Serial.begin(9600);
-          
-          #if defined(HAVE_HWSERIAL1)
-            monitor.begin(1, Serial1);
-          #else
-            #include <SoftwareSerial.h>
-            SoftwareSerial softSerial(2, 3);
-            monitor.begin(1, softSerial);
-          #endif
-          
-          // Test configuration functions
-          monitor.setOverVoltageProtection(14.4);
-          monitor.setUnderVoltageProtection(10.0);
-          monitor.setPositiveOverCurrentProtection(10.0);
-          monitor.setBatteryCapacity(100.0);
-        }
-        
-        void loop() {
-          // Test all getter functions
-          Serial.println("=== Battery Monitor Test ===");
-          Serial.print("Voltage: "); Serial.println(monitor.getVoltage());
-          Serial.print("Current: "); Serial.println(monitor.getCurrent());
-          Serial.print("Temperature: "); Serial.println(monitor.getTemperature());
-          Serial.print("Remaining Capacity: "); Serial.println(monitor.getRemainingCapacity());
-          Serial.print("Internal Resistance: "); Serial.println(monitor.getInternalResistance());
-          Serial.print("Uptime: "); Serial.println(monitor.getUptime());
-          
-          // Test protection settings
-          Serial.print("OVP Voltage: "); Serial.println(monitor.getOverVoltageProtectionVoltage());
-          Serial.print("UVP Voltage: "); Serial.println(monitor.getUnderVoltageProtectionVoltage());
-          
-          delay(5000);
-        }
-        EOF
+    - name: Compile BasicUsage example
+      run: arduino-cli compile --fqbn ${{ matrix.board.fqbn }} examples/BasicUsage
       
-    - name: Create advanced sketch directory
-      run: mkdir -p test_sketch_advanced
-      
-    - name: Compile advanced test sketch
-      run: arduino-cli compile --fqbn ${{ matrix.board.fqbn }} test_sketch_advanced
+    - name: Compile JuncTek_Example (if exists)
+      run: |
+        if [ -f "examples/JuncTek_Example.ino" ]; then
+          # Create a temporary directory for the standalone .ino file
+          mkdir -p temp_example/JuncTek_Example
+          cp examples/JuncTek_Example.ino temp_example/JuncTek_Example/
+          arduino-cli compile --fqbn ${{ matrix.board.fqbn }} temp_example/JuncTek_Example
+        else
+          echo "JuncTek_Example.ino not found, skipping"
+        fi
