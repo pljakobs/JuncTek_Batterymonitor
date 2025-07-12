@@ -7,14 +7,12 @@
  */
 
 #include "JuncTek_BatteryMonitor.h"
-#if !defined(ESP32)
-  #include <SoftwareSerial.h>
-#endif
 
 BatteryMonitor monitor;
 
-// For boards without hardware serial, we'll use SoftwareSerial
+// Include and declare SoftwareSerial only for non-ESP32 boards
 #if !defined(ESP32)
+  #include <SoftwareSerial.h>
   SoftwareSerial batterySerial(2, 3); // RX, TX pins - adjust as needed
 #endif
 

@@ -143,11 +143,11 @@ bool BatteryMonitor::setBatteryPercent(int batteryPercent){
 	}
 }
 void BatteryMonitor::zeroCurrent(){
-	bool rc=sendCommand(bm_address, BM_F_ZeroCurrent, 1);
+	sendCommand(bm_address, BM_F_ZeroCurrent, 1);
 }
 
 void BatteryMonitor::clearAccountingData(){
-	  bool rc=sendCommand(bm_address, BM_F_ClearAccData, 1);
+	sendCommand(bm_address, BM_F_ClearAccData, 1);
 }
 
 int BatteryMonitor::getUptime(){
@@ -408,7 +408,6 @@ void BatteryMonitor::getSetValues(){
 bool BatteryMonitor::sendCommand(int address, int command, int parameter){
 	String message;
 	int command_r,returncode; //values as read back
-	char verb_r,verb;	
 	
 	sendMessage(bm_address, command, parameter);
 	message=readMessage();
@@ -483,7 +482,7 @@ void BatteryMonitor::sendMessage(int address, int command, int parameter){
 
 String BatteryMonitor::readMessage(){   
     String _message;
-    msgState_t _msgState;
+    msgState_t _msgState = reading; // Initialize to reading state
     char c;
     debug("readMessage");
     if (_msgState==crlf){
@@ -523,7 +522,7 @@ int BatteryMonitor::getCacheTime(){
 }
 
 bool BatteryMonitor::checkCache(){
-	if(millis()-measuredValues.lastReadTime < cacheTime){
+	if(millis()-measuredValues.lastReadTime < (unsigned long)cacheTime){
 		return true;
 	} else {
 		// Cache has expired, mark as stale
