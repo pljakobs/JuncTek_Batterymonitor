@@ -5,8 +5,19 @@
 MockSerial Serial;
 #endif
 
-MockJuncTekStream::MockJuncTekStream(bool debug) : readIndex(0), debugMode(debug) {
+MockJuncTekStream::MockJuncTekStream(uint8_t deviceAddress, uint16_t version, uint8_t hallSensor, bool debug)
+    : readIndex(0), debugMode(debug) {
+    // Initialize device state with provided values
+    state.hallSensor = hallSensor;
+    state.voltage_range = 100; // default 100V
+    state.current_range = 20;  // default 200A
+    state.version = version;
+    state.serial = 101; // default serial
+    // Optionally, you can add more parameters to the constructor for other fields
+    // and set them here as needed.
 }
+
+MockJuncTekStream::MockJuncTekStream(bool debug) : MockJuncTekStream(1, 100, 1, debug) {}
 
 int MockJuncTekStream::available() {
     return responseBuffer.length() - readIndex;

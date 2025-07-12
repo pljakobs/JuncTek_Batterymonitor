@@ -189,7 +189,9 @@ private:
     bool processWriteCommand(const String& cmd, int functionNum, uint8_t address);
     
 public:
-    MockJuncTekStream(bool debug = false);
+    // New constructor with address, version, and sensor type
+    MockJuncTekStream(uint8_t deviceAddress, uint16_t version = 100, uint8_t hallSensor = 1, bool debug = false);
+    MockJuncTekStream(bool debug = false); // legacy, delegates to above
     
     // Stream interface
     int available() override;

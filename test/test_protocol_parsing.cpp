@@ -19,7 +19,8 @@ void debug(String msg) {
 }
 
 void setUp(void) {
-    mockStream = new MockJuncTekStream(true); // Enable debug mode
+    // Use new constructor: address=1, version=100, hallSensor=1, debug=true
+    mockStream = new MockJuncTekStream(1, 100, 1, true);
     monitor = new BatteryMonitor();
     debug("=== Test Setup: Initializing BatteryMonitor ===");
     monitor->begin(1, *mockStream);
