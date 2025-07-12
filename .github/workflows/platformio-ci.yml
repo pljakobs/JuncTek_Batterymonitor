@@ -271,4 +271,4 @@ jobs:
     - name: Compile tests for embedded target
       run: |
         cd test_unit
-        pio test -e esp32dev --without-uploading
+        pio run -e esp32dev
