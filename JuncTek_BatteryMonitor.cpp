@@ -536,7 +536,7 @@ void BatteryMonitor::debug(char c){
     Serial.print(c);
     #endif
     }
-void BatteryMonitor::debug(String &msg){
+void BatteryMonitor::debug(const String &msg){
     #ifdef DEBUG
     Serial.println(msg);
     #endif

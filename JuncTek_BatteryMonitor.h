@@ -19,7 +19,7 @@
 
 #define MAXDEVS 4         // max number of battery monitor devices to be supported
 
-//#define DEBUG
+#define DEBUG
 
 /* Format:
  *  
@@ -251,7 +251,7 @@ class BatteryMonitor{
     debug(const char msg[]),
     debug(char msg[]),
     debug(char c),
-    debug(String &msg),
+    debug(const String &msg),
     debug(int i);
   int
   	 getSingleReturnValue_i();
