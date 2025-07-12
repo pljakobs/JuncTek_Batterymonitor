@@ -69,10 +69,8 @@
     
 #else
     #include <Arduino.h>
+    #include <Stream.h>
 #endif
-
-#include <Arduino.h>
-#include <Stream.h>
 
 /**
  * Mock Stream implementation for testing JuncTek Battery Monitor protocol
