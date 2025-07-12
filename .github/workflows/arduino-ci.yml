@@ -2,7 +2,7 @@ name: Arduino Library CI
 
 on:
   push:
-    branches: [ main, develop, copilot/fix-* ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 
