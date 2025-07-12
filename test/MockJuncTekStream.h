@@ -82,6 +82,18 @@
         virtual int peek() = 0;
         virtual size_t write(uint8_t data) = 0;
         virtual size_t write(const uint8_t *buffer, size_t size) = 0;
+        
+        // Add print methods that BatteryMonitor uses
+        virtual void print(const String& str) { 
+            for (size_t i = 0; i < str.length(); i++) {
+                write((uint8_t)str.charAt(i));
+            }
+        }
+        virtual void println(const String& str) { 
+            print(str);
+            write('\r');
+            write('\n');
+        }
     };
     
 #else

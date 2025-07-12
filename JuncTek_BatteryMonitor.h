@@ -215,6 +215,7 @@ class BatteryMonitor{
     getUptime(),
     getBatteryLifeLeft(),
     getTemperature(),
+    getCurrentDirection(),
    
     getProtectionTemperature(),
     getProtectionRecoveryTime(),
