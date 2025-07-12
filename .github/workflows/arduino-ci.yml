@@ -1,0 +1,146 @@
+name: Arduino Library CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  arduino-compile:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        board:
+          - fqbn: "arduino:avr:uno"
+            platform: "arduino:avr"
+          - fqbn: "arduino:avr:mega"
+            platform: "arduino:avr" 
+          - fqbn: "esp32:esp32:esp32"
+            platform: "esp32:esp32"
+            index_url: "https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
+          - fqbn: "esp8266:esp8266:nodemcuv2"
+            platform: "esp8266:esp8266"
+            index_url: "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Arduino CLI
+      uses: arduino/setup-arduino-cli@v1
+      
+    - name: Update package index
+      run: arduino-cli core update-index
+      
+    - name: Install additional package index
+      if: matrix.index_url
+      run: arduino-cli core update-index --additional-urls "${{ matrix.index_url }}"
+      
+    - name: Install platform
+      run: |
+        if [ -n "${{ matrix.index_url }}" ]; then
+          arduino-cli core install ${{ matrix.platform }} --additional-urls "${{ matrix.index_url }}"
+        else
+          arduino-cli core install ${{ matrix.platform }}
+        fi
+        
+    - name: Create test sketch directory
+      run: mkdir -p test_sketch
+      
+    - name: Create basic test sketch
+      run: |
+        cat > test_sketch/test_sketch.ino << 'EOF'
+        #include "JuncTek_BatteryMonitor.h"
+        
+        BatteryMonitor monitor;
+        
+        void setup() {
+          Serial.begin(9600);
+          // Initialize with address 1 and Serial1 (for boards that have it)
+          #if defined(HAVE_HWSERIAL1)
+            monitor.begin(1, Serial1);
+          #else
+            // For boards without Serial1, use SoftwareSerial
+            #include <SoftwareSerial.h>
+            SoftwareSerial softSerial(2, 3); // RX, TX pins
+            monitor.begin(1, softSerial);
+          #endif
+        }
+        
+        void loop() {
+          // Test basic functionality
+          float voltage = monitor.getVoltage();
+          float current = monitor.getCurrent();
+          int temperature = monitor.getTemperature();
+          
+          Serial.print("Voltage: ");
+          Serial.println(voltage);
+          Serial.print("Current: ");
+          Serial.println(current);
+          Serial.print("Temperature: ");
+          Serial.println(temperature);
+          
+          delay(1000);
+        }
+        EOF
+        
+    - name: Create symbolic link to library
+      run: |
+        mkdir -p ~/Arduino/libraries/JuncTek_BatteryMonitor
+        ln -s $PWD/JuncTek_BatteryMonitor.h ~/Arduino/libraries/JuncTek_BatteryMonitor/
+        ln -s $PWD/JuncTek_BatteryMonitor.cpp ~/Arduino/libraries/JuncTek_BatteryMonitor/
+        ln -s $PWD/library.properties ~/Arduino/libraries/JuncTek_BatteryMonitor/
+        
+    - name: Compile test sketch
+      run: arduino-cli compile --fqbn ${{ matrix.board.fqbn }} test_sketch
+      
+    - name: Create advanced test sketch
+      run: |
+        cat > test_sketch_advanced/test_sketch_advanced.ino << 'EOF'
+        #include "JuncTek_BatteryMonitor.h"
+        
+        BatteryMonitor monitor;
+        
+        void setup() {
+          Serial.begin(9600);
+          
+          #if defined(HAVE_HWSERIAL1)
+            monitor.begin(1, Serial1);
+          #else
+            #include <SoftwareSerial.h>
+            SoftwareSerial softSerial(2, 3);
+            monitor.begin(1, softSerial);
+          #endif
+          
+          // Test configuration functions
+          monitor.setOverVoltageProtection(14.4);
+          monitor.setUnderVoltageProtection(10.0);
+          monitor.setPositiveOverCurrentProtection(10.0);
+          monitor.setBatteryCapacity(100.0);
+        }
+        
+        void loop() {
+          // Test all getter functions
+          Serial.println("=== Battery Monitor Test ===");
+          Serial.print("Voltage: "); Serial.println(monitor.getVoltage());
+          Serial.print("Current: "); Serial.println(monitor.getCurrent());
+          Serial.print("Temperature: "); Serial.println(monitor.getTemperature());
+          Serial.print("Remaining Capacity: "); Serial.println(monitor.getRemainingCapacity());
+          Serial.print("Internal Resistance: "); Serial.println(monitor.getInternalResistance());
+          Serial.print("Uptime: "); Serial.println(monitor.getUptime());
+          
+          // Test protection settings
+          Serial.print("OVP Voltage: "); Serial.println(monitor.getOverVoltageProtectionVoltage());
+          Serial.print("UVP Voltage: "); Serial.println(monitor.getUnderVoltageProtectionVoltage());
+          
+          delay(5000);
+        }
+        EOF
+      
+    - name: Create advanced sketch directory
+      run: mkdir -p test_sketch_advanced
+      
+    - name: Compile advanced test sketch
+      run: arduino-cli compile --fqbn ${{ matrix.board.fqbn }} test_sketch_advanced
