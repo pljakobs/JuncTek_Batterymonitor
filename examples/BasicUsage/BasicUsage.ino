@@ -14,7 +14,9 @@
  */
 
 #include "JuncTek_BatteryMonitor.h"
-#include <SoftwareSerial.h>
+#if !defined(ESP32)
+  #include <SoftwareSerial.h>
+#endif
 
 // Create battery monitor instance
 BatteryMonitor monitor;
