@@ -400,7 +400,6 @@ void test_cache_behavior(void) {
     debug("[Cache behavior]: Waiting 150ms for cache to expire");
 
     delay(150);
-#endif
     // Third read should trigger new command
     debug("[Cache behavior]: Third voltage read - cache should be expired");
     mockStream->clearBuffer();
@@ -454,5 +453,4 @@ unsigned long millis() {
     auto now = std::chrono::steady_clock::now();
     return std::chrono::duration_cast<std::chrono::milliseconds>(no).count();
 }
-#endif
 #endif
