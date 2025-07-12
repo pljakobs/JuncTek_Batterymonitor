@@ -14,7 +14,12 @@ int MockJuncTekStream::available() {
 
 int MockJuncTekStream::read() {
     if (readIndex < responseBuffer.length()) {
-        return responseBuffer.charAt(readIndex++);
+        char ch = responseBuffer.charAt(readIndex++);
+        int asciiValue = (int)ch;
+        #ifdef NATIVE_BUILD
+        printf("[MockRead: char='%c' ascii=%d] ", ch, asciiValue);
+        #endif
+        return asciiValue;
     }
     return -1;
 }

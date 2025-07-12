@@ -490,7 +490,11 @@ String BatteryMonitor::readMessage(){
     int t_start=millis();
     while(!bm_serial->available() && millis()-t_start < SERIAL_TIMEOUT);
     while(bm_serial->available() && _msgState != crlf){
-        c=bm_serial->read();
+        int readValue = bm_serial->read();
+        c = (char)readValue;
+        #ifdef NATIVE_BUILD
+        printf("[LibRead: int=%d char='%c'] ", readValue, c);
+        #endif
         debug(c);
         _message=_message+String(c);
         //Serial.print(c);
