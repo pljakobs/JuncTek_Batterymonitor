@@ -227,7 +227,6 @@ class BatteryMonitor{
     getCurrentScale(),
     getCurrentDirection(),
     getCacheTime(),
-    getCurrentDirection(),
     getRelayType();
 
   cacheState_t
