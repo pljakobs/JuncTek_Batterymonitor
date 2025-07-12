@@ -25,15 +25,20 @@
         size_t length() const { return data.length(); }
         char charAt(size_t index) const { return index < data.length() ? data[index] : 0; }
         int indexOf(char ch, size_t start = 0) const { 
+            if (start >= data.length()) return -1; // Arduino behavior
             size_t pos = data.find(ch, start);
             return pos != std::string::npos ? pos : -1;
         }
         int indexOf(const char* substr, size_t start = 0) const { 
+            if (start >= data.length() || !substr) return -1; // Arduino behavior
             size_t pos = data.find(substr, start);
             return pos != std::string::npos ? pos : -1;
         }
         String substring(size_t start, size_t end = std::string::npos) const {
+            if (start >= data.length()) return String(""); // Arduino behavior - return empty string
             if (end == std::string::npos) end = data.length();
+            if (end > data.length()) end = data.length();
+            if (start >= end) return String(""); // Arduino behavior - return empty string
             return String(data.substr(start, end - start));
         }
         int toInt() const { 
