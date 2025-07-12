@@ -7,15 +7,29 @@
  */
 
 #include "JuncTek_BatteryMonitor.h"
+#include <SoftwareSerial.h>
 
 BatteryMonitor monitor;
 
+// For boards without hardware serial, we'll use SoftwareSerial
+#if !defined(ESP32)
+  SoftwareSerial batterySerial(2, 3); // RX, TX pins - adjust as needed
+#endif
+
 void setup() {
   Serial.begin(9600);
-  Serial2.begin(115200); // Adjust baud rate as needed for your device
+  delay(1000);
   
   // Initialize the battery monitor on address 1
-  monitor.begin(1, Serial2);
+  #if defined(ESP32)
+    // ESP32 has multiple hardware serial ports
+    Serial2.begin(115200, SERIAL_8N1, 16, 17); // RX=16, TX=17
+    monitor.begin(1, Serial2);
+  #else
+    // Use SoftwareSerial for other boards
+    batterySerial.begin(9600); // Lower baud rate for SoftwareSerial reliability
+    monitor.begin(1, batterySerial);
+  #endif
   
   Serial.println("JuncTek Battery Monitor initialized");
   Serial.println("Checksum verification enabled");
