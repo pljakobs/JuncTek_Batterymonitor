@@ -4,6 +4,27 @@
 
 This directory contains a comprehensive mock testing framework for the JuncTek Battery Monitor library. The tests verify that the library correctly implements the official JuncTek KL-F communication protocol.
 
+## Testing Architecture
+
+### Separation of Concerns
+
+1. **Build Testing**: Handled by existing CI workflows (`arduino-ci.yml`, `platformio-ci.yml`)
+   - Cross-platform compilation verification (ESP32, ESP8266, Arduino, Teensy, STM32)
+   - Hardware compatibility validation
+   - Library integration testing
+
+2. **Protocol Testing**: Handled by this mock framework (`protocol-tests.yml`)
+   - JuncTek KL-F protocol specification compliance
+   - Command parsing and generation validation
+   - Data format and scaling verification
+   - Error handling and edge cases
+
+This separation ensures:
+- ✅ **No duplication** of build/compilation testing
+- ✅ **Focused testing** - each workflow has a clear purpose  
+- ✅ **Efficient CI** - build workflows run first, protocol tests after successful compilation
+- ✅ **Hardware independence** - protocol tests don't need ESP32/Arduino hardware during CI
+
 ## Protocol Specification
 
 Based on the official JuncTek KL-F manual, the communication protocol uses:
