@@ -13,8 +13,19 @@ MockJuncTekStream::MockJuncTekStream(uint8_t deviceAddress, uint16_t version, ui
     state.current_range = 20;  // default 200A
     state.version = version;
     state.serial = 101; // default serial
-    // Optionally, you can add more parameters to the constructor for other fields
-    // and set them here as needed.
+    // Sensible defaults for live values
+    state.voltage = 2056; // 20.56V (×100)
+    state.current = 200;  // 2.00A (×100)
+    state.temperature = 125; // 25°C (+100)
+    state.remaining_capacity = 75500; // 75.5Ah (×1000)
+    state.cumulative_capacity = 5408; // example value (×1000)
+    state.watt_hour = 4592; // example value (×100000)
+    state.runtime = 14353; // example value (seconds)
+    state.output_status = 0; // ON
+    state.current_direction = 0; // forward/charging
+    state.battery_life = 162; // example value (minutes)
+    state.internal_resistance = 30682; // example value (×100)
+    // Add more fields as needed for realistic defaults
 }
 
 MockJuncTekStream::MockJuncTekStream(bool debug) : MockJuncTekStream(1, 100, 1, debug) {}
