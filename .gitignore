@@ -5,3 +5,8 @@
 .vscode/ipch
 platformio.ini
 extensions.json
+
+# Test files
+test_*.cpp
+test_*.h
+*.test
