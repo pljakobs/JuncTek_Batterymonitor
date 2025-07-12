@@ -241,20 +241,19 @@ jobs:
         
         void test_library_instantiation() {
             BatteryMonitor monitor;
-            TEST_ASSERT_TRUE(true); // Just test that we can create an instance
+            TEST_ASSERT_TRUE(true); // Test that we can create an instance
         }
         
-        void test_checksum_function() {
-            BatteryMonitor monitor;
-            // Test that checksum function exists and can be called
-            // Note: This is a compilation test, not a functional test
+        void test_library_headers_compile() {
+            // Just test that all headers compile and link properly
+            // Don't call any methods that require hardware
             TEST_ASSERT_TRUE(true);
         }
         
         void setup() {
             UNITY_BEGIN();
             RUN_TEST(test_library_instantiation);
-            RUN_TEST(test_checksum_function);
+            RUN_TEST(test_library_headers_compile);
             UNITY_END();
         }
         
