@@ -49,21 +49,21 @@ void setup() {
   Serial.println("Configuring protection settings...");
   
   // Set over-voltage protection to 14.4V
-  if (monitor.setOverVoltageProtection(14.4)) {
+  if (monitor.setOverVoltageProtection(14.4f)) {
     Serial.println("✓ Over-voltage protection set to 14.4V");
   } else {
     Serial.println("✗ Failed to set over-voltage protection");
   }
   
   // Set under-voltage protection to 10.0V
-  if (monitor.setUnderVoltageProtection(10.0)) {
+  if (monitor.setUnderVoltageProtection(10.0f)) {
     Serial.println("✓ Under-voltage protection set to 10.0V");
   } else {
     Serial.println("✗ Failed to set under-voltage protection");
   }
   
   // Set battery capacity to 100Ah
-  if (monitor.setBatteryCapacity(100.0)) {
+  if (monitor.setBatteryCapacity(100.0f)) {
     Serial.println("✓ Battery capacity set to 100Ah");
   } else {
     Serial.println("✗ Failed to set battery capacity");
