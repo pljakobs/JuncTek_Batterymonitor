@@ -110,6 +110,19 @@ bool BatteryMonitor::setTemperatureCalibration(int calibrationTemperature){
   	return sendCommand(bm_address, BM_F_SetTempCalbr,t );
 }
 
+bool BatteryMonitor::setVoltageCalibration(float calibrationVoltage){
+	return sendCommand(bm_address, BM_F_SetVoltCalbr, (int)calibrationVoltage);
+}
+
+bool BatteryMonitor::setCurrentCalibration(float calibrationCurrent){
+	return sendCommand(bm_address, BM_F_SetCurrCalbr, (int)calibrationCurrent);
+}
+
+bool BatteryMonitor::setTemperatureCalibration(float calibrationTemperature){
+	int t=(int)calibrationTemperature+100;
+  	return sendCommand(bm_address, BM_F_SetTempCalbr,t );
+}
+
 bool BatteryMonitor::setRelayType(int relayType){
   return sendCommand(bm_address, BM_F_SetRelayType, relayType);
 }
