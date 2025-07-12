@@ -178,6 +178,12 @@ class BatteryMonitor{
 
     setNewAddress(uint8_t newAddress),
     zeroCurrent(),
+    
+    // Test helper methods
+    #ifdef MOCK_TESTING
+    invalidateCache(),
+    #endif
+
     clearAccountingData(),
     setCacheTime(int),
     resetFactorySettings();

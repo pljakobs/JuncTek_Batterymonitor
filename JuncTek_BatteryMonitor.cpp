@@ -580,3 +580,18 @@ void BatteryMonitor::debug(int i){
     #endif
     #endif
     }
+void BatteryMonitor::debug(String msg){
+    #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg.c_str());
+    #else
+    Serial.println(msg);
+    #endif
+    #endif
+    }
+void BatteryMonitor::invalidateCache() {
+    measuredValues.lastReadTime = 0;
+    #ifdef NATIVE_BUILD
+    printf("[invalidateCache] Cache invalidated for testing\n");
+    #endif
+}

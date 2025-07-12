@@ -111,6 +111,10 @@ void test_read_voltage(void) {
     debug("[voltage]: Setting mock voltage to 20.56V");
     mockStream->setVoltage(20.56);
     
+    // Invalidate cache to force fresh read
+    debug("[voltage]: Invalidating cache to force fresh read");
+    monitor->invalidateCache();
+    
     // Check cache status before reading
     int cacheTime = monitor->getCacheTime();
     debug("[voltage]: Cache time setting: " + String(cacheTime) + "ms");
@@ -137,6 +141,7 @@ void test_read_current(void) {
     // Test positive current
     debug("[current]: Setting mock current to +2.50A (charging)");
     mockStream->setCurrent(2.50);
+    monitor->invalidateCache();
     
     debug("[current]: Querying library for positive current");
     float current = monitor->getCurrent();
@@ -146,6 +151,7 @@ void test_read_current(void) {
     // Test negative current (discharge)
     debug("[current]: Setting mock current to -1.25A (discharging)");
     mockStream->setCurrent(-1.25);
+    monitor->invalidateCache();
     
     debug("[current]: Querying library for negative current");
     current = monitor->getCurrent();
@@ -161,6 +167,7 @@ void test_read_temperature(void) {
     // Set temperature to 25°C
     debug("[temperature]: Setting mock temperature to 25°C");
     mockStream->setTemperature(25);
+    monitor->invalidateCache();
     
     debug("[temperature]: Querying library for temperature");
     int temperature = monitor->getTemperature();
@@ -175,6 +182,7 @@ void test_read_remaining_capacity(void) {
     // Set remaining capacity to 75.5 Ah
     debug("[remaining capacity]: setting to 75.5 Ah");
     mockStream->setRemainingCapacity(75.5);
+    monitor->invalidateCache();
     
     debug("[remaining capacity ]: querying library");
     float capacity = monitor->getRemainingCapacity();
@@ -237,6 +245,7 @@ void test_checksum_verification(void) {
     debug("[checksum]: Injecting response with correct checksum");
     debug("[checksum]: Response: " + testResponse);
     mockStream->injectResponse(testResponse);
+    monitor->invalidateCache();
     
     // Library should accept this response
     debug("[checksum]: Querying library for voltage (should accept response)");
