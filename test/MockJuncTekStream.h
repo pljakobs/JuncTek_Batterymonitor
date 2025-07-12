@@ -6,6 +6,8 @@
     #include <string>
     #include <cstdint>
     #include <cstring>
+    #include <chrono>
+    #include <thread>
     
     // Native environment compatibility layer
     class String {
@@ -25,14 +27,21 @@
             size_t pos = data.find(ch, start);
             return pos != std::string::npos ? pos : -1;
         }
+        int indexOf(const char* substr, size_t start = 0) const { 
+            size_t pos = data.find(substr, start);
+            return pos != std::string::npos ? pos : -1;
+        }
         String substring(size_t start, size_t end = std::string::npos) const {
             if (end == std::string::npos) end = data.length();
             return String(data.substr(start, end - start));
         }
         int toInt() const { return std::stoi(data); }
+        float toFloat() const { return std::stof(data); }
         String& operator+=(const String& other) { data += other.data; return *this; }
         String& operator+=(char ch) { data += ch; return *this; }
+        String& operator+=(const char* str) { data += str; return *this; }
         String operator+(const String& other) const { return String(data + other.data); }
+        String operator+(const char* str) const { return String(data + str); }
         const char* c_str() const { return data.c_str(); }
     };
     
@@ -41,13 +50,26 @@
     public:
         void print(const String& str) { std::cout << str.c_str(); }
         void println(const String& str) { std::cout << str.c_str() << std::endl; }
+        void print(const char* s) { std::cout << s; }
+        void println(const char* s) { std::cout << s << std::endl; }
     };
     extern MockSerial Serial;
     
+    // Add missing Arduino functions for native builds
+    inline unsigned long millis() {
+        static auto start = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+        return duration.count();
+    }
+    
+    inline void delay(unsigned long ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    }
+    
 #else
     #include <Arduino.h>
-#endifdef MOCK_JUNCTEK_STREAM_H
-#define MOCK_JUNCTEK_STREAM_H
+#endif
 
 #include <Arduino.h>
 #include <Stream.h>
@@ -147,4 +169,4 @@ public:
     void simulateGarbledData(bool enable);
 };
 
-#endif // MOCK_JUNCTEK_STREAM_H
+#endif // MOCKJUNCTEKSTREAM_H
