@@ -519,9 +519,9 @@ String BatteryMonitor::readMessage(){
     while(bm_serial->available() && _msgState != crlf){
         int readValue = bm_serial->read();
         c = (char)readValue;
-        #ifdef NATIVE_BUILD
-        printf("[LibRead: int=%d char='%c'] ", readValue, c);
-        #endif
+        //#ifdef NATIVE_BUILD
+        //printf("[LibRead: int=%d char='%c'] ", readValue, c);
+        //#endif
         _message=_message+String(c);
         //Serial.print(c);
         if (c=='\r') {
