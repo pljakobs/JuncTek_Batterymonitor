@@ -79,6 +79,7 @@ void test_read_basic_info(void) {
 
 // Test mock response generation
 void test_mock_response_generation(void) {
+    mockStream->clearBuffer();
     debug("[mock response]: Testing mock stream response generation");
     String lastCmd = mockStream->getLastCommand();
     debug("[mock response]: Initial last command: '" + lastCmd + "'");
