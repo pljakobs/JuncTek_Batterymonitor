@@ -1,4 +1,4 @@
-  #include "JuncTek_BatteryMonitor.h"
+#include "JuncTek_BatteryMonitor.h"
 
 BatteryMonitor::BatteryMonitor(){
 //empty constructor
@@ -137,95 +137,122 @@ void BatteryMonitor::clearAccountingData(){
 
 int BatteryMonitor::getUptime(){
   getMeasuredValues();
+  debug("[getUptime] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.uptime));
   return measuredValues.uptime;
 }
 
 int BatteryMonitor::getBatteryLifeLeft(){
     getMeasuredValues();
+    debug("[getBatteryLifeLeft] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.batteryLifeLeft));
     return measuredValues.batteryLifeLeft;
 }
 int BatteryMonitor::getTemperature(){
     getMeasuredValues();
+    debug("[getTemperature] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.temperature));
     return measuredValues.temperature;
 }
    
 int BatteryMonitor::getProtectionTemperature(){
+    debug("[getProtectionTemperature] value=" + String(setValues.protectionTemperature));
     return setValues.protectionTemperature;
 }
 
 int BatteryMonitor::getProtectionRecoveryTime(){
+    debug("[getProtectionRecoveryTime] value=" + String(setValues.protectionRecoveryTime));
     return setValues.protectionRecoveryTime;
 }
 
 int BatteryMonitor::getProtectionDelayTime(){
+    debug("[getProtectionDelayTime] value=" + String(setValues.protectionDelayTime));
     return setValues.protectionDelayTime;
 }
 
 int BatteryMonitor::getCapacity(){
+    debug("[getCapacity] value=" + String(setValues.presetCapacity/10));
     return setValues.presetCapacity/10;
 }
 
 int BatteryMonitor::getVoltageCalibration(){
+    debug("[getVoltageCalibration] value=" + String(setValues.voltageCalibration));
     return setValues.voltageCalibration;
 }
 
 int BatteryMonitor::getCurrentCalibration(){
+    debug("[getCurrentCalibration] value=" + String(setValues.currentCalibration));
     return setValues.currentCalibration;
 }
 
 int BatteryMonitor::getTemperatureCalibration(){
+    debug("[getTemperatureCalibration] value=" + String(setValues.temperatureCalibration));
     return setValues.temperatureCalibration;
 }
 
 int BatteryMonitor::getVoltageScale(){  
+    debug("[getVoltageScale] value=" + String(setValues.voltageScale));
     return setValues.voltageScale;
 }
 int BatteryMonitor::getCurrentScale(){
+    debug("[getCurrentScale] value=" + String(setValues.currentScale));
     return setValues.currentScale;
 }
-
 int BatteryMonitor::getCurrentDirection(){
+    debug("[getCurrentDirection] value=" + String(measuredValues.currentDir));
     return measuredValues.currentDir;
 }
-
 int BatteryMonitor::getRelayType(){
-	return setValues.relayType;
+    debug("[getRelayType] value=" + String(setValues.relayType));
+    return setValues.relayType;
 }
 float BatteryMonitor::getVoltage() {
+  #ifdef NATIVE_BUILD
+  printf("[getVoltage] Before getMeasuredValues: voltage=%f\n", measuredValues.voltage);
+  #endif
   getMeasuredValues();
+  debug("[getVoltage] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.voltage));
+  #ifdef NATIVE_BUILD
+  printf("[getVoltage] After getMeasuredValues: voltage=%f\n", measuredValues.voltage);
+  #endif
   return measuredValues.voltage;
 }
 float BatteryMonitor::getCurrent(){
   getMeasuredValues();
+  debug("[getCurrent] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.current));
   return measuredValues.current;
 }
 float BatteryMonitor::getInternalResistance(){
   getMeasuredValues();
+  debug("[getInternalResistance] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.internalResistance));
   return measuredValues.internalResistance;
 }
 float BatteryMonitor::getRemainingCapacity(){
   getMeasuredValues();
+  debug("[getRemainingCapacity] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.remainingCapacity));
   return measuredValues.remainingCapacity;
 }
 float BatteryMonitor::getCumulativeCapacity(){
   getMeasuredValues();
+  debug("[getCumulativeCapacity] cacheValid=" + String(checkCache()) + ", value=" + String(measuredValues.cumulativeCapacity));
   return measuredValues.cumulativeCapacity;
 }
-
 float BatteryMonitor::getOverVoltageProtectionVoltage(){
   getSetValues();  
+  debug("[getOverVoltageProtectionVoltage] value=" + String(setValues.OVPVoltage));
   return setValues.OVPVoltage;
 }
 float BatteryMonitor::getUnderVoltageProtectionVoltage(){
+  debug("[getUnderVoltageProtectionVoltage] value=" + String(setValues.UVPVoltage));
   return setValues.UVPVoltage;
 }
 float BatteryMonitor::getOverCurrentProtectionForwardCurrent(){
+  debug("[getOverCurrentProtectionForwardCurrent] value=" + String(setValues.OCPForwardCurrent));
   return setValues.OCPForwardCurrent;
 }
 float BatteryMonitor::getOverCurrentProtectionReverseCurrent(){
+  debug("[getOverCurrentProtectionReverseCurrent] value=" + String(setValues.OCPReverseCurrent));
   return setValues.OCPReverseCurrent;
 }
 float BatteryMonitor::getOverPowerProtectionPower(){
+  debug("[getOverPowerProtectionPower] value=" + String(setValues.OPPPower));
   return setValues.OPPPower;
 }
 
@@ -299,6 +326,20 @@ void BatteryMonitor::getMeasuredValues(){
 	  measuredValues.outputState=getStringField(message,11).toInt();
 	  measuredValues.currentDir=getStringField(message,12).toInt();
 	  measuredValues.lastReadTime=millis();
+
+    debug("[getMeasuredValues]:");
+    debug("--------------------------------------------------------");
+    debug("| Uptime: " + String(measuredValues.uptime));
+    debug("| Battery Life Left: " + String(measuredValues.batteryLifeLeft));
+    debug("| Temperature: " + String(measuredValues.temperature));
+    debug("| Voltage: " + String(measuredValues.voltage));
+    debug("| Current: " + String(measuredValues.current));
+    debug("| Internal Resistance: " + String(measuredValues.internalResistance));
+    debug("| Remaining Capacity: " + String(measuredValues.remainingCapacity));
+    debug("| Cumulative Capacity: " + String(measuredValues.cumulativeCapacity));
+    debug("| Output State: " + String(measuredValues.outputState));
+    debug("| Current Direction: " + String(measuredValues.currentDir));
+    debug("--------------------------------------------------------");
 	}
 }
 void BatteryMonitor::getSetValues(){
@@ -365,6 +406,24 @@ void BatteryMonitor::getSetValues(){
         normallyOpen=0,
         normallyClosed=1
    */
+  debug("[getSetValues]");
+  debug("--------------------------------------------------------");
+  debug("| OVP Voltage: " + String(setValues.OVPVoltage));
+  debug("| UVP Voltage: " + String(setValues.UVPVoltage));
+  debug("| OCP Forward Current: " + String(setValues.OCPForwardCurrent));
+  debug("| OCP Reverse Current: " + String(setValues.OCPReverseCurrent));
+  debug("| OPP Power: " + String(setValues.OPPPower));
+  debug("| Protection Temperature: " + String(setValues.protectionTemperature));
+  debug("| Protection Recovery Time: " + String(setValues.protectionRecoveryTime));
+  debug("| Protection Delay Time: " + String(setValues.protectionDelayTime));
+  debug("| Preset Capacity: " + String(setValues.presetCapacity));
+  debug("| Voltage Calibration: " + String(setValues.voltageCalibration));
+  debug("| Current Calibration: " + String(setValues.currentCalibration));
+  debug("| Temperature Calibration: " + String(setValues.temperatureCalibration));
+  debug("| Voltage Scale: " + String(setValues.voltageScale));
+  debug("| Current Scale: " + String(setValues.currentScale));
+  debug("| Relay Type: " + String(setValues.relayType));
+  debug("--------------------------------------------------------");
 }
 
 bool BatteryMonitor::sendCommand(int address, int command, int parameter){
@@ -458,8 +517,11 @@ String BatteryMonitor::readMessage(){
     int t_start=millis();
     while(!bm_serial->available() && millis()-t_start < SERIAL_TIMEOUT);
     while(bm_serial->available() && _msgState != crlf){
-        c=bm_serial->read();
-        debug(c);
+        int readValue = bm_serial->read();
+        c = (char)readValue;
+        //#ifdef NATIVE_BUILD
+        //printf("[LibRead: int=%d char='%c'] ", readValue, c);
+        //#endif
         _message=_message+String(c);
         //Serial.print(c);
         if (c=='\r') {
@@ -485,32 +547,63 @@ int BatteryMonitor::getCacheTime(){
 }
 
 bool BatteryMonitor::checkCache(){
-	return(millis()-measuredValues.lastReadTime<cacheTime);
+	bool cacheValid = (millis()-measuredValues.lastReadTime<cacheTime);
+	#ifdef NATIVE_BUILD
+	printf("[checkCache] lastReadTime=%lu, currentTime=%lu, cacheTime=%lu, valid=%s\n", 
+	       measuredValues.lastReadTime, millis(), cacheTime, cacheValid ? "true" : "false");
+	#endif
+	return cacheValid;
 }
 
 void BatteryMonitor::debug(const char msg[]){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg);
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 
 void BatteryMonitor::debug(char msg[]){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg);
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 void BatteryMonitor::debug(char c){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%c", c);
+    #else
     Serial.print(c);
     #endif
+    #endif
     }
-void BatteryMonitor::debug(String &msg){
+void BatteryMonitor::debug(const String &msg){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%s\n", msg.c_str());
+    #else
     Serial.println(msg);
+    #endif
     #endif
     }
 void BatteryMonitor::debug(int i){
     #ifdef DEBUG
+    #ifdef NATIVE_BUILD
+    printf("%d\n", i);
+    #else
     Serial.println(i);
     #endif
+    #endif
     }
+void BatteryMonitor::invalidateCache() {
+    measuredValues.lastReadTime = 0;
+    #ifdef NATIVE_BUILD
+    printf("[invalidateCache] Cache invalidated for testing\n");
+    #endif
+}
