@@ -39,7 +39,7 @@ int MockJuncTekStream::read() {
         char ch = responseBuffer.charAt(readIndex++);
         int asciiValue = (int)ch;
         #ifdef NATIVE_BUILD
-        printf("[MockRead: char='%c' ascii=%d] ", ch, asciiValue);
+        //printf("[MockRead: char='%c' ascii=%d] ", ch, asciiValue);
         #endif
         return asciiValue;
     }

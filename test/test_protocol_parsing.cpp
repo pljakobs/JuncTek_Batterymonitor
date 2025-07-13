@@ -37,7 +37,7 @@ void test_read_basic_info(void) {
     debug("[basic info]: Testing R00 command parsing and response generation");
 #ifdef NATIVE_BUILD
     // Test R00 command parsing and response generation
-    String testCommand = ":R00=1,123,";
+    String testCommand = ":R00=1,2,1";
     debug("[basic info]: Sending test command: " + testCommand);
     
     // Send command to mock stream
